@@ -85,7 +85,7 @@ export const AnimationContainer = styled.div`
     gap: 24px;
     width: 100%;
     a + a {
-      color: var(--red-color);
+      color: green;
       transition: 0.3s;
 
       &:hover {
