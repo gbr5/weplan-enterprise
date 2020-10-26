@@ -88,28 +88,35 @@ export const AnimationContainer = styled.div`
     text-align: center;
 
     p {
+      border-bottom: 1px solid var(--primary-color);
+    }
+
+    strong {
       color: var(--title-color);
       line-height: 40px;
       transition: 0.3s;
-      &:hover {
-        color: green;
-      }
     }
 
     &:hover {
       color: var(--title-color);
 
       p {
+        color: var(--primary-color);
+      }
+      strong {
         color: green;
       }
     }
   }
   a + a {
-    color: var(--red-color);
-    transition: 0.3s;
-
+    strong {
+      color: green;
+      transition: 0.3s;
+    }
     &:hover {
-      color: var(--title-color);
+      strong {
+        color: var(--primary-color);
+      }
     }
   }
 

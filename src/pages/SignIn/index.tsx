@@ -90,7 +90,7 @@ const SignIn: React.FC = () => {
       <Content>
         <AnimationContainer>
           <h1>
-            WePlan <strong>PRO</strong>
+            WePlan <strong>Enterprise</strong>
           </h1>
 
           <Form ref={formRef} onSubmit={handleSubmit}>
@@ -101,7 +101,7 @@ const SignIn: React.FC = () => {
               <h2>A genialidade está na simplicidade,</h2>
             </div>
             <div>
-              <h2>A perfeição nos detalhes !</h2>
+              <h2>A excelência nos detalhes !</h2>
             </div>
             <Input
               name="email"
@@ -120,10 +120,10 @@ const SignIn: React.FC = () => {
             <Link to="/forgot-password">Esqueci minha senha</Link>
           </Form>
           <div>
-            <Link to="/">Cadastro de Fornecedor</Link>
-            <a href="https://www.weplan.party" target="blank">
-              Não sou fornecedor
+            <a href="https://www.weplan.pro" target="blank">
+              Cadastro de Planners
             </a>
+            <Link to="/">Cadastro de Empresas</Link>
           </div>
         </AnimationContainer>
       </Content>

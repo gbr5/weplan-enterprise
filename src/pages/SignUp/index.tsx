@@ -220,13 +220,18 @@ const SignUp: React.FC = () => {
           {!!options && (
             <>
               <h1>
-                WePlan <strong>PRO</strong>
+                WePlan <strong>Enterprise</strong>
               </h1>
               <Form ref={formRef} onSubmit={handleSubmit}>
                 <div>
                   <h3>Work</h3> <h1>SMART!</h1>
                 </div>
-                {/* <div><h2>A genialidade está na simplicidade,</h2></div><div><h2>A perfeição nos detalhes !</h2></div> */}
+                <div>
+                  <h2>A genialidade está na simplicidade,</h2>
+                </div>
+                <div>
+                  <h2>A excelência nos detalhes !</h2>
+                </div>
                 <Input
                   name="name"
                   icon={FiUser}
@@ -259,11 +264,11 @@ const SignUp: React.FC = () => {
                 <Button type="submit">Cadastrar</Button>
               </Form>
               <Link to="/person-signup">
-                Antes de cadastrar sua empresa, faça o seu cadastro{' '}
-                <p>AQUI !</p>
+                <p>Antes de cadastrar sua empresa, faça o seu cadastro no</p>{' '}
+                <strong>WePlan | PRO</strong>
               </Link>
               <a href="https://www.weplan.party" target="blank">
-                Não sou fornecedor
+                Se você não é fornecedor acesse <strong>WePlan | Party</strong>
               </a>
             </>
           )}
@@ -298,8 +303,7 @@ const SignUp: React.FC = () => {
               <div>
                 <h3>Work</h3> <h1>Smart!</h1>
               </div>
-              <p>Qual o melhor telefone para contato?</p>
-              <p>Pode ser até o seu whatsapp! </p>
+              <p>Qual o seu telefone?</p>
               <Input
                 name="contact_info"
                 type="text"
