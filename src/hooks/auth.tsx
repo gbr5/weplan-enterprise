@@ -32,26 +32,33 @@ const AuthContext = createContext<IAuthContextData>({} as IAuthContextData);
 const AuthProvider: React.FC = ({ children }) => {
   const [data, setData] = useState<IAuthState>(() => {
     const token = localStorage.getItem('@WePlan:token');
-    const user = localStorage.getItem('@WePlan:user');
+    const rawUser = localStorage.getItem('@WePlan:user');
+    const userMasters = localStorage.getItem('@WePlan:userMasters');
 
-    if (token && user) {
-      api.defaults.headers.authorization = `Bearer ${token}`;
+    if (rawUser) {
+      const user = JSON.parse(rawUser);
+      if ((token && user.isCompany) || (token && userMasters)) {
+        api.defaults.headers.authorization = `Bearer ${token}`;
 
-      return { token, user: JSON.parse(user) };
+        return {
+          token,
+          user,
+        };
+      }
     }
-
     return {} as IAuthState;
   });
 
   const signOut = useCallback(() => {
     localStorage.removeItem('@WePlan:token');
     localStorage.removeItem('@WePlan:user');
+    localStorage.removeItem('@WePlan:userMasters');
+    localStorage.removeItem('@WePlan:enterprise');
 
     setData({} as IAuthState);
   }, []);
 
   const signIn = useCallback(async ({ email, password }) => {
-    console.log(email, password);
     const response = await api.post('sessions', {
       email,
       password,
@@ -59,23 +66,15 @@ const AuthProvider: React.FC = ({ children }) => {
 
     const { token, user } = response.data;
 
-    if (user.isCompany) {
-      const findSupplier = await api.get(`/wp/contract-orders/${user.id}`);
-      const isSupplier = findSupplier.data;
-
-      if (isSupplier === '') {
+    if (!user.isCompany) {
+      const findSupplier = await api.get(`/suppliers/masters/user/${user.id}`);
+      const isSupplier = findSupplier.data[0];
+      if (!isSupplier) {
         throw new Error('user not found');
       }
-    } else {
-      const findSupplier = await api.get(`/supplier-employees/user/${user.id}`);
-      const isSupplier = findSupplier.data;
-
-      if (isSupplier === '') {
-        throw new Error('user not found');
-      }
-      localStorage.setItem('@WePlan:employee', JSON.stringify(findSupplier));
+      console.log(isSupplier);
+      localStorage.setItem('@WePlan:userMasters', JSON.stringify(isSupplier));
     }
-
     localStorage.setItem('@WePlan:token', token);
     localStorage.setItem('@WePlan:user', JSON.stringify(user));
 
