@@ -94,7 +94,6 @@ const CompanyDashboard: React.FC = () => {
     modules,
     updateCompany,
     updateCompanyInfo,
-    updateModules,
   } = useAuth();
 
   const { addToast } = useToast();
@@ -117,7 +116,6 @@ const CompanyDashboard: React.FC = () => {
     IWPContractOrder[]
   >([]);
   console.log(companyWPContracts);
-
   const [dashboardTitle, setDashboardTitle] = useState(
     'Informações da Empresa',
   );
@@ -302,12 +300,11 @@ const CompanyDashboard: React.FC = () => {
             return sortModules;
           });
           setCompanyWPContracts(response.data);
-          updateModules(sortModules);
         });
     } catch (err) {
       throw new Error(err);
     }
-  }, [company, updateModules]);
+  }, [company]);
   useEffect(() => {
     getCompanyWPContractOrders();
   }, [getCompanyWPContractOrders]);
