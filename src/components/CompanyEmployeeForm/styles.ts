@@ -17,6 +17,23 @@ export const Container = styled.div`
   }
 `;
 
+export const ModulesContainer = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 32px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  h2 {
+    height: 42px;
+    font-size: 32px;
+  }
+  span {
+  }
+`;
+
 export const FirstRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 4fr;
@@ -136,7 +153,7 @@ export const SecondRow = styled.div`
   }
 `;
 
-export const WPModule = styled.div`
+export const WPModule = styled.button`
   display: flex;
   text-align: left;
   gap: 16px;

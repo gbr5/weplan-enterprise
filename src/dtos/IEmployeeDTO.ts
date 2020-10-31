@@ -23,8 +23,11 @@ interface IEmployeeConfirmationDTO {
 export default interface IEmployeeDTO {
   id: string;
   position: string;
+  access_key: string;
+  email: string;
+  isActive: boolean;
   employee: IUserEmployee;
   company: ICompany;
-  modules: IModulesDTO[];
-  confirmation: IEmployeeConfirmationDTO;
+  // modules: IModulesDTO[];
+  // confirmation: IEmployeeConfirmationDTO;
 }

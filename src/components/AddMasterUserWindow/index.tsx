@@ -26,10 +26,11 @@ const AddMasterUserWindow: React.FC<IPropsDTO> = ({
   getMasterUsers,
   handleMessageWindow,
 }: IPropsDTO) => {
-  const { user } = useAuth();
+  const { person, company } = useAuth();
 
   const [users, setUsers] = useState<IUserDTO[]>([]);
   const [masterUser, setMasterUser] = useState<IUserDTO>({} as IUserDTO);
+  console.log(masterUser);
 
   const handleSelectUser = useCallback(
     (props: IUserDTO) => {
@@ -47,7 +48,7 @@ const AddMasterUserWindow: React.FC<IPropsDTO> = ({
       try {
         api.get<IUserDTO[]>(`/users?name=${props}`).then(response => {
           const allUsers = response.data.filter(
-            thisUser => thisUser.id !== user.id,
+            thisUser => thisUser.id !== person.id,
           );
           setUsers(allUsers);
         });
@@ -55,12 +56,17 @@ const AddMasterUserWindow: React.FC<IPropsDTO> = ({
         throw new Error(err);
       }
     },
-    [user],
+    [person],
   );
 
   const handleAddMasterUser = useCallback(async () => {
+    console.log(company, masterUser);
     try {
-      await api.post(`suppliers/master/user/${masterUser.id}`);
+      await api.post(`suppliers/master/user/${company.id}/${masterUser.id}`, {
+        email: `${masterUser.name}@${masterUser.name}.com`,
+        password: masterUser.name,
+      });
+      console.log(company, masterUser);
 
       getMasterUsers();
       handleMessageWindow();
@@ -68,7 +74,13 @@ const AddMasterUserWindow: React.FC<IPropsDTO> = ({
     } catch (err) {
       throw new Error(err);
     }
-  }, [masterUser, getMasterUsers, handleCloseWindow, handleMessageWindow]);
+  }, [
+    company,
+    getMasterUsers,
+    handleCloseWindow,
+    handleMessageWindow,
+    masterUser,
+  ]);
 
   return (
     <WindowContainer

@@ -27,7 +27,7 @@ interface IPropsDTO {
   type: string;
   handleCloseWindow: Function;
   onHandleCloseWindow: MouseEventHandler;
-  getCompanyInfo: Function;
+  getCompanyInfo?: Function;
 }
 
 const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
@@ -41,7 +41,7 @@ const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
 }: IPropsDTO) => {
   const { addToast } = useToast();
   const formRef = useRef<FormHandles>(null);
-  const { updateUser } = useAuth();
+  const { updateCompany, company, updateCompanyInfo } = useAuth();
 
   const inputHeight = { height: '32px' };
 
@@ -53,7 +53,7 @@ const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
             companyInformation.companyName === undefined ||
             companyInformation.companyName === ''
           ) {
-            await api.post('company-info', {
+            const response = await api.post('company-info', {
               name: data.companyName,
               company_id:
                 companyInformation.companyID === undefined
@@ -61,11 +61,16 @@ const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
                   : companyInformation.companyID,
               user_id: companyInformation.user_id,
             });
+            updateCompanyInfo(response.data);
           } else {
-            await api.put('company-info', {
-              name: data.companyName,
-              company_id: companyInformation.companyID,
-            });
+            const response = await api.put(
+              `company-info/${companyInformation.user_id}`,
+              {
+                name: data.companyName,
+                company_id: companyInformation.companyID,
+              },
+            );
+            updateCompanyInfo(response.data);
           }
         }
         if (inputName === 'companyID') {
@@ -73,7 +78,7 @@ const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
             companyInformation.companyID === undefined ||
             companyInformation.companyID === ''
           ) {
-            await api.post('company-info', {
+            const response = await api.post('company-info', {
               name:
                 companyInformation.companyName === undefined
                   ? companyInformation.user_id
@@ -81,28 +86,33 @@ const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
               company_id: data.companyID,
               user_id: companyInformation.user_id,
             });
+            updateCompanyInfo(response.data);
           } else {
-            await api.put('company-info', {
-              name: companyInformation.companyName,
-              company_id: data.companyID,
-            });
+            const response = await api.put(
+              `company-info/${companyInformation.user_id}`,
+              {
+                name: companyInformation.companyName,
+                company_id: data.companyID,
+              },
+            );
+            updateCompanyInfo(response.data);
           }
         }
         if (inputName === 'userName') {
-          const response = await api.put('profile', {
+          const response = await api.put(`profile/${company.id}`, {
             name: data.userName,
             email: companyInformation.email,
           });
 
-          updateUser(response.data);
+          updateCompany(response.data);
         }
         if (inputName === 'email') {
-          const response = await api.put('profile', {
+          const response = await api.put(`profile/${company.id}`, {
             name: companyInformation.userName,
             email: data.email,
           });
 
-          updateUser(response.data);
+          updateCompany(response.data);
         }
         if (inputName === 'phone') {
           if (companyInformation.phone === 0) {
@@ -128,7 +138,7 @@ const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
           title: 'Membro da festa adicionado com sucesso',
           description: 'Ele já pode visualizar as informações do evento.',
         });
-        getCompanyInfo();
+        getCompanyInfo && getCompanyInfo();
         handleCloseWindow();
       } catch (err) {
         addToast({
@@ -145,7 +155,9 @@ const EditCompanyInfoInput: React.FC<IPropsDTO> = ({
       getCompanyInfo,
       inputName,
       companyInformation,
-      updateUser,
+      updateCompany,
+      company,
+      updateCompanyInfo,
     ],
   );
 

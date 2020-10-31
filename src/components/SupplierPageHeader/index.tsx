@@ -1,20 +1,9 @@
-import React, {
-  useCallback,
-  useState,
-  useContext,
-  MouseEventHandler,
-} from 'react';
+import React, { useCallback, useState, useContext } from 'react';
 import Swicth from 'react-switch';
 import { ThemeContext } from 'styled-components';
 
 import { useHistory } from 'react-router-dom';
-import { MdHelp } from 'react-icons/md';
-import {
-  FiSettings,
-  FiPower,
-  FiChevronDown,
-  FiChevronUp,
-} from 'react-icons/fi';
+import { FiPower } from 'react-icons/fi';
 import { Header, HeaderContent, Menu, ToggleButton } from './styles';
 import { useToggleTheme } from '../../hooks/theme';
 
@@ -29,20 +18,11 @@ interface ICompanyInfoDTO {
   name: string;
   logo: string;
 }
-interface IPropsDTO {
-  module?: string;
-  modulesMenu?: boolean;
-  handleModulesMenu?: MouseEventHandler;
-}
 
-const SupplierPageHeader: React.FC<IPropsDTO> = ({
-  module,
-  modulesMenu,
-  handleModulesMenu,
-}: IPropsDTO) => {
+const SupplierPageHeader: React.FC = () => {
   const { colors } = useContext(ThemeContext);
   const history = useHistory();
-  const { user } = useAuth();
+  const { company, companyInfo } = useAuth();
 
   const [helpWindow, setHelpWindow] = useState(false);
   const [settingsWindow, setSettingsWindow] = useState(false);
@@ -51,88 +31,31 @@ const SupplierPageHeader: React.FC<IPropsDTO> = ({
   const { signOut } = useAuth();
   const { toggleTheme, themeBoolean } = useToggleTheme();
 
-  const closeAllWindows = useCallback(() => {
-    setHelpWindow(false);
-    setSettingsWindow(false);
-  }, []);
-
-  const handleHelpWindow = useCallback(() => {
-    closeAllWindows();
-    setHelpWindow(!helpWindow);
-  }, [closeAllWindows, helpWindow]);
-
-  const handleSettingsWindow = useCallback(() => {
-    closeAllWindows();
-    setSettingsWindow(!settingsWindow);
-  }, [closeAllWindows, settingsWindow]);
-
   const handleNavigateToDashboard = useCallback(() => {
     history.push('/dashboard');
   }, [history]);
 
-  // const handleGetCompanyLogo = useCallback(() => {
-  //   if (user.isCompany) {
-  //     api.get<ICompanyInfoDTO>('company-info').then(response => {
-  //       setSupplierLogo(response.data.logo);
-  //     });
-  //   }
-  //   api.get<IEmployeeDTO>(`supplier-employees/${user.id}`).then(response => {
-  //     setSupplierLogo(
-  //       response.data.company.avatar_url === undefined
-  //         ? ''
-  //         : response.data.company.avatar_url,
-  //     );
-  //   });
-  // }, [user]);
-
-  // useEffect(() => {
-  //   handleGetCompanyLogo();
-  // }, [handleGetCompanyLogo]);
+  const companyLogo = companyInfo.logo_url
+    ? companyInfo.logo_url
+    : supplierlogo;
 
   return (
     <>
       <Header>
         <HeaderContent>
-          <img src={supplierlogo} alt="WePlanPRO" />
+          <img src={companyLogo} alt="WePlanPRO" />
 
           <button type="button" onClick={handleNavigateToDashboard}>
             <img src={logo} alt="WePlan" />
             <h1>PRO</h1>
           </button>
 
-          {!user.isCompany ? (
-            <>
-              {module}
-              <button type="button" onClick={handleModulesMenu}>
-                {modulesMenu ? (
-                  <FiChevronDown size={40} />
-                ) : (
-                  <FiChevronUp size={40} />
-                )}
-              </button>
-            </>
-          ) : (
-            <h2>{user.name}</h2>
-          )}
-          {!user.isCompany ? (
-            <Menu>
-              <button type="button" onClick={handleHelpWindow}>
-                <MdHelp />
-              </button>
-              <button type="button" onClick={handleSettingsWindow}>
-                <FiSettings />
-              </button>
-              <button type="button" onClick={signOut}>
-                <FiPower />
-              </button>
-            </Menu>
-          ) : (
-            <Menu>
-              <button type="button" onClick={signOut}>
-                <FiPower />
-              </button>
-            </Menu>
-          )}
+          <h2>{company.name}</h2>
+          <Menu>
+            <button type="button" onClick={signOut}>
+              <FiPower />
+            </button>
+          </Menu>
         </HeaderContent>
       </Header>
       {!!helpWindow && (

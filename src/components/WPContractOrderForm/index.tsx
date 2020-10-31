@@ -45,7 +45,7 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
   getCompanyWPContracts,
 }: IPropsDTO) => {
   const { addToast } = useToast();
-  const { user } = useAuth();
+  const { company } = useAuth();
 
   const [wpProducts, setWPProducts] = useState<IWPProductDTO[]>([]);
   const [companyCRMModuleQuantity, setCRMQuantity] = useState(0);
@@ -102,7 +102,7 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
       console.log(wpProducts);
 
       await api.post('/wp/contract-orders', {
-        user_id: user.id,
+        user_id: company.id,
         products: selectedWPProducts,
       });
 
@@ -130,7 +130,7 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
     companyProductionModuleQuantity,
     companyProjectModuleQuantity,
     companyFinancialModuleQuantity,
-    user,
+    company,
     wpCRM,
     wpFinancial,
     wpProduction,
