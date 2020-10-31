@@ -4,7 +4,7 @@ export const Container = styled.div`
   display: flex;
   width: 100%;
   height: 100%;
-  gap: 32px;
+  gap: 40px;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -14,6 +14,47 @@ export const Container = styled.div`
   h2 {
     height: 42px;
     font-size: 32px;
+    color: var(--title-color);
+  }
+`;
+
+export const MessageField = styled.div`
+  td {
+    height: 80px;
+  }
+`;
+export const ModuleContainer = styled.div`
+  width: 100%;
+  display: flex;
+
+  h3 {
+    font-size: 16px;
+  }
+
+  button {
+    width: 150px;
+  }
+`;
+export const ModulesContainer = styled.div`
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 32px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+
+  h2 {
+    height: 42px;
+    font-size: 32px;
+  }
+
+  span {
+    width: 100%;
+    display: flex;
+    gap: 16px;
+    flex-direction: column;
   }
 `;
 
@@ -23,9 +64,11 @@ export const FirstRow = styled.div`
   width: 100%;
   align-items: center;
   gap: 40px;
+  margin-bottom: 40px;
 
   img {
     height: 120px;
+    width: 120px;
     border-radius: 50%;
   }
 
@@ -80,35 +123,11 @@ export const ButtonContainer = styled.div`
   }
 `;
 export const AddButton = styled.button`
+  width: 100%;
+  height: 40px;
+  border: none;
+  border-radius: 4px;
   background: var(--primary-color);
-  width: 100%;
-  height: 40px;
-  border: none;
-  border-radius: 4px;
-  color: var(--letter-color-5);
-  transition: 0.3s;
-
-  &:hover {
-    background: var(--letter-color-5);
-    color: var(--primary-color);
-    box-shadow: var(--window-box-shadow);
-    font-weight: 500;
-  }
-`;
-export const DeleteButton = styled.button`
-  width: 100%;
-  height: 40px;
-  border: none;
-  border-radius: 4px;
-  background: var(--red-color);
-  color: var(--letter-color-5);
-  transition: 0.3s;
-
-  &:hover {
-    background: var(--letter-color-5);
-    color: var(--red-color);
-    box-shadow: var(--window-box-shadow);
-  }
 `;
 
 export const SecondRow = styled.div`
@@ -133,23 +152,34 @@ export const SecondRow = styled.div`
 
     div {
       width: 100%;
+
+      h3 {
+        width: 100%;
+        font-size: 20px;
+        color: var(--primary-color);
+      }
       p {
         width: 100%;
         font-size: 16px;
         margin-bottom: 16px;
         color: var(--letter-color-4);
       }
-      div {
+      td {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: var(--card-color);
+        color: var(--letter-color-5);
+        font-weight: 500;
+        border-radius: 4px;
+        padding-left: 8px;
 
-        p {
-          width: 100%;
-          font-size: 16px;
-          margin-bottom: 16px;
-          color: var(--letter-color-4);
-        }
         button {
-          width: 100%;
+          margin-bottom: 5px;
+          margin-left: auto;
+          background: transparent;
+          width: 40px;
           font-size: 16px;
           height: 24px;
           border: none;
@@ -160,7 +190,7 @@ export const SecondRow = styled.div`
   }
 `;
 
-export const WPModule = styled.div`
+export const WPModule = styled.button`
   display: flex;
   text-align: left;
   gap: 16px;

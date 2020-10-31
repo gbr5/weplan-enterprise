@@ -127,7 +127,7 @@ export const ConfirmedEmployeeSection = styled.div`
   }
 `;
 
-export const UnConfirmedEmployeeSection = styled.div`
+export const UnConfirmedCompanyMasters = styled.div`
   height: 100%;
   width: 100%;
   color: var(--letter-color-5);

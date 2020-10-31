@@ -2,6 +2,7 @@ interface ICompanyInfoDTO {
   id: string;
   name: string;
   company_id: string;
+  logo_url: string;
   updated_at: Date;
 }
 
@@ -15,6 +16,8 @@ export default interface IEnterpriseDTO {
   id: string;
   companyInfo: ICompanyInfoDTO;
   name: string;
-  modules: IWPModulesDTO;
+  avatar_url: string;
+  email: string;
+  modules: IWPModulesDTO[];
   isWPMarketPlace: boolean;
 }

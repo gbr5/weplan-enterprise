@@ -22,17 +22,26 @@ import {
   UnConfirmedEmployeeSection,
 } from './styles';
 import AddEmployeeWindow from '../AddEmployeeWindow';
-import WPContractOrderForm from '../WPContractOrderForm';
-import ICompanyInfoDTO from '../../dtos/ICompanyInfoDTO';
+// import WPContractOrderForm from '../WPContractOrderForm';
 import logo from '../../assets/elefante.png';
 import WindowContainer from '../WindowContainer';
 import IUserDTO from '../../dtos/IUserDTO';
-import EditCompanyEmployeeForm from '../EditCompanyEmployeeForm';
 import EditCompanyInfoInput from '../EditCompanyInfoInput';
 import AddMasterUserWindow from '../AddMasterUserWindow';
 import { useToast } from '../../hooks/toast';
 import SupplierPageHeader from '../SupplierPageHeader';
+import EditCompanyEmployeeForm from '../EditCompanyEmployeeForm';
+import WPContractOrderForm from '../WPContractOrderForm';
 
+interface IUserEmployeeDTO {
+  id: string;
+  name: string;
+  position: string;
+  access_key: string;
+  email: string;
+  isActive: boolean;
+  employee_id: string;
+}
 interface IWPProduct {
   id: string;
   name: string;
@@ -56,7 +65,7 @@ interface IWPContractOrder {
 
 interface IContractWPModulesDTO {
   id: string;
-  name: string;
+  management_module: string;
 }
 
 interface IMasterUserDTO {
@@ -79,7 +88,14 @@ interface ICompanyInformationDTO {
 }
 
 const CompanyDashboard: React.FC = () => {
-  const { user, updateUser } = useAuth();
+  const {
+    company,
+    companyInfo,
+    modules,
+    updateCompany,
+    updateCompanyInfo,
+  } = useAuth();
+
   const { addToast } = useToast();
 
   // 1
@@ -92,34 +108,31 @@ const CompanyDashboard: React.FC = () => {
   const [companyEmailInput, setCompanyEmailInput] = useState(false);
   // 5
   const [companyPhoneInput, setCompanyPhoneInput] = useState(false);
+  const [companyInformation, setCompanyInformation] = useState(
+    {} as ICompanyInformationDTO,
+  );
 
+  const [companyWPContracts, setCompanyWPContracts] = useState<
+    IWPContractOrder[]
+  >([]);
+  console.log(companyWPContracts);
   const [dashboardTitle, setDashboardTitle] = useState(
     'Informações da Empresa',
   );
   const [companyPhone, setCompanyPhone] = useState(0);
 
   const [wpModules, setWPModules] = useState<IContractWPModulesDTO[]>();
-  const [companyWPContracts, setCompanyWPContracts] = useState<
-    IWPContractOrder[]
-  >([]);
 
-  const [companyInformation, setCompanyInformation] = useState<
-    ICompanyInformationDTO
-  >({} as ICompanyInformationDTO);
-  const [companyHiredModules, setCompanyHiredModules] = useState<
-    IContractWPModulesDTO[]
-  >([]);
+  // const [companyHiredModules, setCompanyHiredModules] = useState(modules);
   const [marketPlace, setMarketPlace] = useState(false);
   const [masterUsers, setMasterUsers] = useState<IMasterUserDTO[]>([]);
+
   const [employees, setEmployees] = useState<IEmployeeDTO[]>([]);
-  const [unConfirmedEmployees, setUnConfirmedEmployees] = useState<
-    IEmployeeDTO[]
-  >([]);
-  const [selectedEmployee, setSelectedEmployee] = useState<IEmployeeDTO>(
-    {} as IEmployeeDTO,
+  const [selectedEmployee, setSelectedEmployee] = useState(
+    {} as IUserEmployeeDTO,
   );
-  const [companyInfo, setCompanyInfo] = useState<ICompanyInfoDTO>(
-    {} as ICompanyInfoDTO,
+  const [notActiveEmployees, setNotActiveEmployees] = useState<IEmployeeDTO[]>(
+    [],
   );
   // 1
   const [companyInfoSection, setCompanyInfoSection] = useState(true);
@@ -196,14 +209,6 @@ const CompanyDashboard: React.FC = () => {
     setContractOrderWindow(true);
     setFinancialSection(true);
   }, [closeAllWindow]);
-  const handleEditEmployeeWindow = useCallback(
-    (props: IEmployeeDTO) => {
-      closeAllWindow();
-      setEditEmployeeWindow(true);
-      setSelectedEmployee(props);
-    },
-    [closeAllWindow],
-  );
   const handleInitialWindow = useCallback(() => {
     closeAllWindow();
     setCompanyInfoSection(true);
@@ -236,8 +241,8 @@ const CompanyDashboard: React.FC = () => {
 
         data.append('avatar', e.target.files[0]);
 
-        api.patch('/users/avatar', data).then(response => {
-          updateUser(response.data);
+        api.patch(`/users/avatar/${company.id}`, data).then(response => {
+          updateCompany(response.data);
         });
         addToast({
           type: 'success',
@@ -245,13 +250,25 @@ const CompanyDashboard: React.FC = () => {
         });
       }
     },
-    [addToast, updateUser],
+    [addToast, updateCompany, company],
   );
 
+  const handleEditEmployeeFormWindow = useCallback((props: IEmployeeDTO) => {
+    setSelectedEmployee({
+      id: props.id,
+      name: props.employee.name,
+      access_key: props.access_key,
+      email: props.email,
+      position: props.position,
+      isActive: props.isActive,
+      employee_id: props.employee.id,
+    });
+    setEditEmployeeWindow(true);
+  }, []);
   const getCompanyWPContractOrders = useCallback(() => {
     try {
       api
-        .get<IWPContractOrder[]>(`/wp/contract-orders/${user.id}`)
+        .get<IWPContractOrder[]>(`/wp/contract-orders/${company.id}`)
         .then(response => {
           if (response.data.length <= 0) {
             setChooseWPproductMessageWindow(true);
@@ -267,12 +284,12 @@ const CompanyDashboard: React.FC = () => {
                 pName === 'Projects'
               ) {
                 const findModules = sortModules.find(
-                  sModule => sModule.name === pName,
+                  sModule => sModule.management_module === pName,
                 );
                 if (findModules === undefined) {
                   sortModules.push({
                     id: mProduct.weplanProduct.id,
-                    name: mProduct.weplanProduct.name,
+                    management_module: mProduct.weplanProduct.name,
                   });
                 }
               } else {
@@ -283,12 +300,11 @@ const CompanyDashboard: React.FC = () => {
             return sortModules;
           });
           setCompanyWPContracts(response.data);
-          setCompanyHiredModules(sortModules);
         });
     } catch (err) {
       throw new Error(err);
     }
-  }, [user]);
+  }, [company]);
   useEffect(() => {
     getCompanyWPContractOrders();
   }, [getCompanyWPContractOrders]);
@@ -296,12 +312,12 @@ const CompanyDashboard: React.FC = () => {
   const getCompanyEmployees = useCallback(() => {
     try {
       api
-        .get<IEmployeeDTO[]>(`supplier-employees/${user.id}`)
+        .get<IEmployeeDTO[]>(`supplier-employees/${company.id}`)
         .then(response => {
           if (response.data.length <= 0) {
             setAddEmployeeMessageWindow(true);
           }
-          setUnConfirmedEmployees(
+          setNotActiveEmployees(
             response.data
               .map(tEmployee => {
                 return {
@@ -309,13 +325,12 @@ const CompanyDashboard: React.FC = () => {
                   employee: tEmployee.employee,
                   company: tEmployee.company,
                   position: tEmployee.position,
-                  modules: tEmployee.modules,
-                  confirmation: tEmployee.confirmation,
+                  access_key: tEmployee.access_key,
+                  isActive: tEmployee.isActive,
+                  email: tEmployee.email,
                 };
               })
-              .filter(
-                tEmployee => tEmployee.confirmation.isConfirmed === false,
-              ),
+              .filter(tEmployee => tEmployee.isActive === false),
           );
           setEmployees(
             response.data
@@ -325,17 +340,18 @@ const CompanyDashboard: React.FC = () => {
                   employee: tEmployee.employee,
                   company: tEmployee.company,
                   position: tEmployee.position,
-                  modules: tEmployee.modules,
-                  confirmation: tEmployee.confirmation,
+                  access_key: tEmployee.access_key,
+                  isActive: tEmployee.isActive,
+                  email: tEmployee.email,
                 };
               })
-              .filter(tEmployee => tEmployee.confirmation.isConfirmed === true),
+              .filter(tEmployee => tEmployee.isActive === true),
           );
         });
     } catch (err) {
       throw new Error(err);
     }
-  }, [user]);
+  }, [company]);
 
   useEffect(() => {
     getCompanyEmployees();
@@ -344,7 +360,7 @@ const CompanyDashboard: React.FC = () => {
   const getCompanyMasterUsers = useCallback(() => {
     try {
       api
-        .get<IMasterUserDTO[]>(`suppliers/master/users/${user.id}`)
+        .get<IMasterUserDTO[]>(`suppliers/master/users/${company.id}`)
         .then(response => {
           if (response.data.length <= 0) {
             setAddMasterUserWindow(true);
@@ -365,7 +381,7 @@ const CompanyDashboard: React.FC = () => {
     } catch (err) {
       throw new Error(err);
     }
-  }, [user]);
+  }, [company]);
 
   useEffect(() => {
     getCompanyMasterUsers();
@@ -387,29 +403,15 @@ const CompanyDashboard: React.FC = () => {
     getWPManagementModules();
   }, [getWPManagementModules]);
 
-  const getCompanyInfo = useCallback(() => {
-    try {
-      api.get<ICompanyInfoDTO>(`company-info/${user.id}`).then(response => {
-        setCompanyInfo(response.data);
-      });
-    } catch (err) {
-      throw new Error(err);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    getCompanyInfo();
-  }, [getCompanyInfo]);
-
   const getCompanyContactInfo = useCallback(() => {
     try {
-      api.get(`/profile/contact-info/${user.id}/phone`).then(response => {
+      api.get(`/profile/contact-info/${company.id}/phone`).then(response => {
         setCompanyPhone(response.data.contact_info);
       });
     } catch (err) {
       throw new Error(err);
     }
-  }, [user]);
+  }, [company]);
 
   useEffect(() => {
     getCompanyContactInfo();
@@ -422,8 +424,11 @@ const CompanyDashboard: React.FC = () => {
 
         data.append('logo', e.target.files[0]);
 
-        await api.patch('/company-info/logo', data);
-        getCompanyInfo();
+        const response = await api.patch(
+          `/company-info/logo/${company.id}`,
+          data,
+        );
+        updateCompanyInfo(response.data);
 
         addToast({
           type: 'success',
@@ -431,20 +436,9 @@ const CompanyDashboard: React.FC = () => {
         });
       }
     },
-    [addToast, getCompanyInfo],
+    [addToast, company, updateCompanyInfo],
   );
 
-  useEffect(() => {
-    setCompanyInformation({
-      user_id: user.id,
-      userName: user.name,
-      email: user.email,
-      companyName: companyInfo.name,
-      company_info_id: companyInfo.id,
-      companyID: companyInfo.company_id,
-      phone: companyPhone,
-    });
-  }, [user, companyInfo, companyPhone]);
   useEffect(() => {
     if (companyInfoSection) {
       setDashboardTitle('Informações da Empresa');
@@ -465,7 +459,6 @@ const CompanyDashboard: React.FC = () => {
       setDashboardTitle('Colaboradores');
     }
   }, [
-    user,
     companyInfoSection,
     financialSection,
     employeesSection,
@@ -474,22 +467,38 @@ const CompanyDashboard: React.FC = () => {
     documentationSection,
   ]);
   let companyAvatar = logo;
-  if (user.avatar_url !== undefined) {
-    companyAvatar = user.avatar_url;
+  if (company.avatar_url !== undefined) {
+    companyAvatar = company.avatar_url;
   }
   let companyLogo = logo;
   if (companyInfo.logo_url !== undefined) {
     companyLogo = companyInfo.logo_url;
   }
 
+  useEffect(() => {
+    setCompanyInformation({
+      user_id: company.id,
+      userName: company.name,
+      email: company.email,
+      companyName: companyInfo.name,
+      company_info_id: companyInfo.id,
+      companyID: companyInfo.company_id,
+      phone: companyPhone,
+    });
+  }, [company, companyPhone, companyInfo]);
+
   return (
     <>
+      {!!editEmployeeWindow && (
+        <EditCompanyEmployeeForm
+          getEmployees={getCompanyEmployees}
+          onHandleCloseWindow={() => setEditEmployeeWindow(false)}
+          userEmployee={selectedEmployee}
+        />
+      )}
       {!!addEmployeeWindow && !!wpModules && (
         <AddEmployeeWindow
-          wpModules={wpModules}
-          wpCompanyContract={companyWPContracts[companyWPContracts.length - 1]}
           getEmployees={getCompanyEmployees}
-          handleCloseWindow={() => setAddEmployeeWindow(false)}
           onHandleCloseWindow={handleEmployeesWindow}
         />
       )}
@@ -501,16 +510,7 @@ const CompanyDashboard: React.FC = () => {
           onHandleCloseWindow={handleInitialWindow}
         />
       )}
-      {!!editEmployeeWindow && !!wpModules && (
-        <EditCompanyEmployeeForm
-          employee={selectedEmployee}
-          wpModules={wpModules}
-          wpCompanyContract={companyWPContracts[companyWPContracts.length - 1]}
-          getEmployees={getCompanyEmployees}
-          handleCloseWindow={() => setEditEmployeeWindow(false)}
-          onHandleCloseWindow={handleEmployeesWindow}
-        />
-      )}
+
       {!!contractOrderWindow && (
         <WPContractOrderForm
           getCompanyWPContracts={getCompanyWPContractOrders}
@@ -553,7 +553,7 @@ const CompanyDashboard: React.FC = () => {
             left: '25%',
           }}
         >
-          <h2>Olá {user.name}, tudo bem?</h2>
+          <h2>Olá {company.name}, tudo bem?</h2>
           <p>Vi que você ainda não possui nenhum produto contratado.</p>
           <p>Qual a sua necessidade no momento?</p>
           <p>Posso pedir para um de nossos consultores te ligar?</p>
@@ -634,12 +634,11 @@ const CompanyDashboard: React.FC = () => {
                         <tr>
                           <td>Razão Social</td>
                           {!companyNameInput ? (
-                            <td>{companyInfo.name}</td>
+                            <td>{companyInfo ? companyInfo.name : ''}</td>
                           ) : (
                             <EditCompanyInfoInput
                               companyInformation={companyInformation}
                               defaultValue={companyInfo.name}
-                              getCompanyInfo={getCompanyInfo}
                               handleCloseWindow={() =>
                                 setCompanyNameInput(false)
                               }
@@ -662,12 +661,11 @@ const CompanyDashboard: React.FC = () => {
                         <tr>
                           <td>CNPJ</td>
                           {!companyIDInput ? (
-                            <td>{companyInfo.company_id}</td>
+                            <td>{companyInfo ? companyInfo.company_id : ''}</td>
                           ) : (
                             <EditCompanyInfoInput
                               companyInformation={companyInformation}
                               defaultValue={companyInfo.company_id}
-                              getCompanyInfo={getCompanyInfo}
                               onHandleCloseWindow={handleCloseCompanyInfoInput}
                               handleCloseWindow={() => setCompanyIDInput(false)}
                               inputName="companyID"
@@ -686,12 +684,11 @@ const CompanyDashboard: React.FC = () => {
                         <tr>
                           <td>Nome de Usuário</td>
                           {!companyUserNameInput ? (
-                            <td>{user.name}</td>
+                            <td>{company.name}</td>
                           ) : (
                             <EditCompanyInfoInput
                               companyInformation={companyInformation}
-                              defaultValue={user.name}
-                              getCompanyInfo={getCompanyInfo}
+                              defaultValue={company.name}
                               onHandleCloseWindow={handleCloseCompanyInfoInput}
                               handleCloseWindow={() =>
                                 setCompanyUserNameInput(false)
@@ -714,13 +711,12 @@ const CompanyDashboard: React.FC = () => {
                         <tr>
                           <td>e-mail</td>
                           {!companyEmailInput ? (
-                            <td>{user.email}</td>
+                            <td>{company.email}</td>
                           ) : (
                             <EditCompanyInfoInput
                               companyInformation={companyInformation}
-                              defaultValue={user.email}
+                              defaultValue={company.email}
                               onHandleCloseWindow={handleCloseCompanyInfoInput}
-                              getCompanyInfo={getCompanyInfo}
                               handleCloseWindow={() =>
                                 setCompanyEmailInput(false)
                               }
@@ -824,9 +820,9 @@ const CompanyDashboard: React.FC = () => {
                     <div>
                       <h2>Módulos Contratados</h2>
                       <table>
-                        {companyHiredModules.map(hModule => (
-                          <tr key={hModule.id}>
-                            <td>{hModule.name}</td>
+                        {modules.map(hModule => (
+                          <tr key={hModule.management_module}>
+                            <td>{hModule.management_module}</td>
                           </tr>
                         ))}
                       </table>
@@ -871,7 +867,7 @@ const CompanyDashboard: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  handleEditEmployeeWindow(thiEmployee)
+                                  handleEditEmployeeFormWindow(thiEmployee)
                                 }
                               >
                                 <FiChevronsRight size={24} />
@@ -884,7 +880,7 @@ const CompanyDashboard: React.FC = () => {
                   </EmployeeScrollList>
                 </ConfirmedEmployeeSection>
                 <UnConfirmedEmployeeSection>
-                  <h2>A confirmar</h2>
+                  <h2>Colaboradores Inativos</h2>
                   <EmployeeScrollList>
                     <table>
                       <tr>
@@ -895,29 +891,30 @@ const CompanyDashboard: React.FC = () => {
                           <FiEye size={30} />
                         </th>
                       </tr>
-                      {unConfirmedEmployees.map(thiEmployee => {
-                        const employeeIndex =
-                          unConfirmedEmployees.findIndex(
-                            index => index.id === thiEmployee.id,
-                          ) + 1;
-                        return (
-                          <tr key={employeeIndex}>
-                            <td>{employeeIndex}</td>
-                            <td>{thiEmployee.employee.name}</td>
-                            <td>{thiEmployee.position}</td>
-                            <td>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleEditEmployeeWindow(thiEmployee)
-                                }
-                              >
-                                <FiChevronsRight size={24} />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {notActiveEmployees.length > 0 &&
+                        notActiveEmployees.map(thiEmployee => {
+                          const employeeIndex =
+                            notActiveEmployees.findIndex(
+                              index => index.id === thiEmployee.id,
+                            ) + 1;
+                          return (
+                            <tr key={employeeIndex}>
+                              <td>{employeeIndex}</td>
+                              <td>{thiEmployee.employee.name}</td>
+                              <td>{thiEmployee.position}</td>
+                              <td>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEditEmployeeFormWindow(thiEmployee)
+                                  }
+                                >
+                                  <FiChevronsRight size={24} />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                     </table>
                   </EmployeeScrollList>
                 </UnConfirmedEmployeeSection>

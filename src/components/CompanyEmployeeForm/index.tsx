@@ -2,7 +2,6 @@ import React, {
   MouseEventHandler,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -13,21 +12,20 @@ import { useToast } from '../../hooks/toast';
 
 import Input from '../Input';
 import WindowContainer from '../WindowContainer';
+import AddEmployeeModulesWindow from '../AddEmployeeModulesWindow';
 
 import api from '../../services/api';
-import IWPContractOrderDTO from '../../dtos/IWPContractOrderDTO';
-import IEmployeeDTO from '../../dtos/IEmployeeDTO';
 import avatarPlaceholder from '../../assets/avatar_placeholder_cat2.jpeg';
 
 import {
   Container,
   FirstRow,
   SecondRow,
-  WPModule,
   BooleanButton,
-  ButtonContainer,
   AddButton,
+  ModulesContainer,
 } from './styles';
+import { useAuth } from '../../hooks/auth';
 
 interface IEmployeeUserPersonInfoDTO {
   id: string;
@@ -40,122 +38,70 @@ interface IUserEmployeeDTO {
   id: string;
   name: string;
 }
-interface IContractWPModulesDTO {
-  id: string;
-  name: string;
-}
 
-interface IEmployeeWPModulesDTO {
-  management_module_id: string;
-  access_level: number;
+interface IEmployeeForm {
+  position: string;
+  access_key: string;
+  password: string;
+  title: string;
+  message: string;
 }
 
 interface IPropsDTO {
-  wpCompanyContract: IWPContractOrderDTO;
-  wpModules: IContractWPModulesDTO[];
-  // eslint-disable-next-line react/require-default-props
-  // employees?: IEmployeeDTO[];
-  // eslint-disable-next-line react/require-default-props
-  employee?: IEmployeeDTO;
-  // eslint-disable-next-line react/require-default-props
-  userEmployee?: IUserEmployeeDTO;
+  userEmployee: IUserEmployeeDTO;
   onHandleCloseWindow: MouseEventHandler;
-  handleCloseWindow: Function;
   getEmployees: Function;
 }
 
 const CompanyEmployeeForm: React.FC<IPropsDTO> = ({
   onHandleCloseWindow,
-  handleCloseWindow,
   getEmployees,
-  wpCompanyContract,
-  employee,
   userEmployee,
-  wpModules,
 }: IPropsDTO) => {
   const { addToast } = useToast();
+  const { company, modules } = useAuth();
   const formRef = useRef<FormHandles>(null);
 
-  // const [contractModules, setContractModules] = useState<
-  //   IContractWPModulesDTO[]
-  // >([]);
-  const [employeeCRMLevel, setEmployeeCRMLevel] = useState(0);
-  const [employeeProductionLevel, setEmployeeProductionLevel] = useState(0);
-  const [employeeProjectLevel, setEmployeeProjectLevel] = useState(0);
-  const [employeeFinancialLevel, setEmployeeFinancialLevel] = useState(0);
-  const [salaryInput, setSalaryInput] = useState(false);
-  const [employeeUserInfo, setEmployeeUserInfo] = useState<
-    IEmployeeUserPersonInfoDTO
-  >({} as IEmployeeUserPersonInfoDTO);
-  const wpCRM = wpModules.find(wpM => wpM.name === 'Comercial');
-  const wpProduction = wpModules.find(wpM => wpM.name === 'Operations');
-  const wpProject = wpModules.find(wpM => wpM.name === 'Projects');
-  const wpFinancial = wpModules.find(wpM => wpM.name === 'Financial');
+  const [modulesWindow, setModulesWindow] = useState(false);
+  const [addModulesWindow, setAddModulesWindow] = useState(false);
+  const [moduleName, setModuleName] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
+
+  const handleModulesWindow = useCallback((props: string) => {
+    setModuleName(props);
+    setModulesWindow(true);
+  }, []);
+
+  const [employeeUserInfo, setEmployeeUserInfo] = useState(
+    {} as IEmployeeUserPersonInfoDTO,
+  );
 
   const inputHeight = { height: '40px' };
 
-  const handleDeleteEmployee = useCallback(async () => {
-    try {
-      if (employee) {
-        await api.delete(`/supplier-employees/${employee.id}`);
-        getEmployees();
-        addToast({
-          type: 'success',
-          title: 'Contrato deletado com sucesso',
-          description: 'As informações do evento já foram atualizadas.',
-        });
-      }
-    } catch (err) {
-      throw new Error(err);
-    }
-  }, [employee, addToast, getEmployees]);
-
   const handleSubmit = useCallback(
-    async (data: IEmployeeDTO) => {
+    async (data: IEmployeeForm) => {
       try {
-        const modules: IEmployeeWPModulesDTO[] = [];
-
-        employeeCRMLevel > 0 &&
-          modules.push({
-            management_module_id: wpCRM ? wpCRM.id : '',
-            access_level: employeeCRMLevel,
-          });
-        employeeFinancialLevel > 0 &&
-          modules.push({
-            management_module_id: wpFinancial ? wpFinancial.id : '',
-            access_level: employeeFinancialLevel,
-          });
-        employeeProductionLevel > 0 &&
-          modules.push({
-            management_module_id: wpProduction ? wpProduction.id : '',
-            access_level: employeeProductionLevel,
-          });
-        employeeProjectLevel > 0 &&
-          modules.push({
-            management_module_id: wpProject ? wpProject.id : '',
-            access_level: employeeProjectLevel,
-          });
-
-        const salary = salaryInput ? data.confirmation.salary : 0;
-
-        if (userEmployee) {
-          await api.post(`supplier-employees/${userEmployee.id}`, {
+        const newEmployee = await api.post(
+          `supplier-employees/${company.id}/${userEmployee.id}`,
+          {
             position: data.position,
-            modules,
-            request_message: data.confirmation.request_message,
-            salary,
-          });
-        } else {
-          throw new Error('usuário não encontrado');
-        }
+            access_key: data.access_key,
+            password: data.password,
+            title: data.title,
+            message: data.message,
+          },
+        );
+        const newEmployeeId = newEmployee.data.id;
+        setEmployeeId(newEmployeeId);
 
         addToast({
           type: 'success',
-          title: 'Membro da festa adicionado com sucesso',
-          description: 'Ele já pode visualizar as informações do evento.',
+          title: 'Colaborador adicionado com sucesso',
+          description:
+            'As informações do seu dashboard de colaboradores já foram atualizadas.',
         });
         getEmployees();
-        handleCloseWindow();
+        setAddModulesWindow(true);
       } catch (err) {
         addToast({
           type: 'error',
@@ -165,22 +111,12 @@ const CompanyEmployeeForm: React.FC<IPropsDTO> = ({
         throw new Error(err);
       }
     },
-    [
-      addToast,
-      salaryInput,
-      getEmployees,
-      employeeCRMLevel,
-      employeeFinancialLevel,
-      employeeProductionLevel,
-      employeeProjectLevel,
-      userEmployee,
-      wpCRM,
-      wpFinancial,
-      wpProduction,
-      wpProject,
-      handleCloseWindow,
-    ],
+    [addToast, getEmployees, userEmployee, company],
   );
+
+  const handleCloseModulesWindow = useCallback(() => {
+    setModulesWindow(false);
+  }, []);
 
   const getEmployeePersonInfo = useCallback(() => {
     try {
@@ -196,294 +132,125 @@ const CompanyEmployeeForm: React.FC<IPropsDTO> = ({
     getEmployeePersonInfo();
   }, [getEmployeePersonInfo]);
 
-  const hiredModules = useMemo(() => {
-    if (wpCompanyContract) {
-      const availableModules: IContractWPModulesDTO[] = [];
-      wpCompanyContract.products.map(product => {
-        const productName = wpModules.find(
-          xModule => xModule.name === product.weplanProduct.name,
-        );
-        if (productName !== undefined) {
-          availableModules.push({
-            id: productName.id,
-            name: productName.name,
-          });
-          return productName;
-        }
-        return productName;
-      });
-
-      return availableModules;
-    }
-
-    throw new Error('WPManagementModule not found.');
-  }, [wpCompanyContract, wpModules]);
-
   return (
-    <WindowContainer
-      onHandleCloseWindow={onHandleCloseWindow}
-      containerStyle={{
-        zIndex: 20,
-        top: '5%',
-        left: '5%',
-        height: '90%',
-        width: '90%',
-      }}
-    >
-      <Form ref={formRef} onSubmit={handleSubmit}>
-        <Container>
-          <h2>Adicionar Colaborador</h2>
-          <div>
-            <FirstRow>
-              <img src={avatarPlaceholder} alt="WePlanPRO Company Employee" />
-              <div>
-                <span>
-                  <strong>Nome de Usuário</strong>
-                  <p>{userEmployee?.name}</p>
-                </span>
-                <span>
-                  <strong>Nome</strong>
-                  <span>
-                    <p>{employeeUserInfo.first_name}</p>
-                    <p>{employeeUserInfo.last_name}</p>
-                  </span>
-                </span>
-                <span>
-                  <strong>CPF</strong>
-                  <p>xxx.xxx.xxx-xx</p>
-                  {/* <p>{employeeUserInfo.person_id}</p> */}
-                </span>
-              </div>
-            </FirstRow>
-            <SecondRow>
+    <>
+      {modulesWindow && (
+        <AddEmployeeModulesWindow
+          employeeID={employeeId}
+          handleCloseWindow={() => setModulesWindow(false)}
+          moduleName={moduleName}
+          onHandleCloseWindow={handleCloseModulesWindow}
+        />
+      )}
+      {addModulesWindow && (
+        <WindowContainer
+          onHandleCloseWindow={onHandleCloseWindow}
+          containerStyle={{
+            zIndex: 22,
+            top: '5%',
+            left: '15%',
+            height: '90%',
+            width: '70%',
+          }}
+        >
+          <ModulesContainer>
+            <h3>Acessos</h3>
+            {modules.length !== 0 ? (
               <span>
+                {modules.map(xModule => (
+                  <BooleanButton
+                    isActive={xModule.management_module === 'omercial'}
+                    type="button"
+                    onClick={() =>
+                      handleModulesWindow(xModule.management_module)
+                    }
+                    key={xModule.management_module}
+                  >
+                    <strong>{xModule.management_module}</strong>
+                  </BooleanButton>
+                ))}
+              </span>
+            ) : (
+              <span>
+                <strong>Você ainda não possui módulos de gestão</strong>
+                <button type="button">Eu quero vencer!</button>
+              </span>
+            )}
+          </ModulesContainer>
+        </WindowContainer>
+      )}
+      <WindowContainer
+        onHandleCloseWindow={onHandleCloseWindow}
+        containerStyle={{
+          zIndex: 20,
+          top: '5%',
+          left: '15%',
+          height: '90%',
+          width: '70%',
+        }}
+      >
+        <Form ref={formRef} onSubmit={handleSubmit}>
+          <Container>
+            <h2>Adicionar Colaborador</h2>
+            <div>
+              <FirstRow>
+                <img src={avatarPlaceholder} alt="WePlanPRO Company Employee" />
                 <div>
-                  <p>Cargo</p>
-                  <Input name="position" containerStyle={inputHeight} />
+                  <span>
+                    <strong>Nome de Usuário</strong>
+                    <p>{userEmployee.name}</p>
+                  </span>
+                  <span>
+                    <strong>Nome</strong>
+                    <span>
+                      <p>{employeeUserInfo.first_name}</p>
+                      <p>{employeeUserInfo.last_name}</p>
+                    </span>
+                  </span>
+                  <span>
+                    <strong>CPF</strong>
+                    <p>xxx.xxx.xxx-xx</p>
+                    {/* <p>{employeeUserInfo.person_id}</p> */}
+                  </span>
                 </div>
-                {!salaryInput ? (
+              </FirstRow>
+              <SecondRow>
+                <span>
                   <div>
-                    <p>Definir Salário?</p>
-                    <ButtonContainer>
-                      <button
-                        type="button"
-                        onClick={() => setSalaryInput(true)}
-                        style={{ backgroundColor: 'green' }}
-                      >
-                        Sim
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSalaryInput(false)}
-                        style={{ backgroundColor: 'red' }}
-                      >
-                        Não
-                      </button>
-                    </ButtonContainer>
+                    <p>Cargo</p>
+                    <Input name="position" containerStyle={inputHeight} />
                   </div>
-                ) : (
                   <div>
-                    <div>
-                      <p>Definir Salário</p>
-                      <button
-                        type="button"
-                        onClick={() => setSalaryInput(false)}
-                        style={{ backgroundColor: 'red' }}
-                      >
-                        Desfazer
-                      </button>
-                    </div>
-                    <Input
-                      name="confirmation.salary"
-                      type="number"
+                    <p>Título da Mensagem</p>
+                    <Input name="title" containerStyle={inputHeight} />
+                  </div>
+                  <div>
+                    <p>Mensagem</p>
+                    <Input name="message" containerStyle={inputHeight} />
+                  </div>
+                </span>
+                <span>
+                  <div>
+                    <p>Chave de acesso</p>
+                    <Input name="access_key" containerStyle={inputHeight} />
+                  </div>
+                  <div>
+                    <p>Senha</p>
+                    <Input name="password" containerStyle={inputHeight} />
+                    {/* <Input
+                      name="password_confirmation"
+                      placeholder="Confirme a sua senha"
                       containerStyle={inputHeight}
-                    />
+                    /> */}
                   </div>
-                )}
-                <div>
-                  <p>Mensagem</p>
-                  <Input
-                    name="confirmation.request_message"
-                    containerStyle={inputHeight}
-                  />
-                </div>
-              </span>
-              <span>
-                <h3>Acessos</h3>
-                {hiredModules ? (
-                  <span>
-                    {hiredModules.map(xModule => (
-                      <WPModule key={xModule.id}>
-                        <strong>{xModule.name}</strong>
-                        {xModule.name === 'Comercial' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeCRMLevel === 1}
-                              onClick={() =>
-                                setEmployeeCRMLevel(
-                                  employeeCRMLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeCRMLevel === 2}
-                              onClick={() =>
-                                setEmployeeCRMLevel(
-                                  employeeCRMLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeCRMLevel === 3}
-                              onClick={() =>
-                                setEmployeeCRMLevel(
-                                  employeeCRMLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                        {xModule.name === 'Financial' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeFinancialLevel === 1}
-                              onClick={() =>
-                                setEmployeeFinancialLevel(
-                                  employeeFinancialLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeFinancialLevel === 2}
-                              onClick={() =>
-                                setEmployeeFinancialLevel(
-                                  employeeFinancialLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeFinancialLevel === 3}
-                              onClick={() =>
-                                setEmployeeFinancialLevel(
-                                  employeeFinancialLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                        {xModule.name === 'Operations' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProductionLevel === 1}
-                              onClick={() =>
-                                setEmployeeProductionLevel(
-                                  employeeProductionLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProductionLevel === 2}
-                              onClick={() =>
-                                setEmployeeProductionLevel(
-                                  employeeProductionLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProductionLevel === 3}
-                              onClick={() =>
-                                setEmployeeProductionLevel(
-                                  employeeProductionLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                        {xModule.name === 'Projects' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProjectLevel === 1}
-                              onClick={() =>
-                                setEmployeeProjectLevel(
-                                  employeeProjectLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProjectLevel === 2}
-                              onClick={() =>
-                                setEmployeeProjectLevel(
-                                  employeeProjectLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProjectLevel === 3}
-                              onClick={() =>
-                                setEmployeeProjectLevel(
-                                  employeeProjectLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                      </WPModule>
-                    ))}
-                  </span>
-                ) : (
-                  <span>
-                    <strong>Você ainda não possui módulos de gestão</strong>
-                    <button type="button">Eu quero vencer!</button>
-                  </span>
-                )}
-              </span>
-            </SecondRow>
-          </div>
-          {!!employee && (
-            <button type="button" onClick={handleDeleteEmployee}>
-              Deletar Contrato
-            </button>
-          )}
-          <AddButton type="submit">Adicionar Colaborador</AddButton>
-        </Container>
-      </Form>
-    </WindowContainer>
+                </span>
+              </SecondRow>
+            </div>
+            <AddButton type="submit">Adicionar Colaborador</AddButton>
+          </Container>
+        </Form>
+      </WindowContainer>
+    </>
   );
 };
 

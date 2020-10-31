@@ -2,33 +2,41 @@ import React, {
   MouseEventHandler,
   useCallback,
   useEffect,
-  useMemo,
-  useRef,
   useState,
 } from 'react';
-// import * as Yup from 'yup';
-import { Form } from '@unform/web';
-import { FormHandles } from '@unform/core';
-import { useToast } from '../../hooks/toast';
+import { FiChevronRight } from 'react-icons/fi';
 
-import Input from '../Input';
 import WindowContainer from '../WindowContainer';
 
 import api from '../../services/api';
-import IWPContractOrderDTO from '../../dtos/IWPContractOrderDTO';
-import IEmployeeDTO from '../../dtos/IEmployeeDTO';
 import avatarPlaceholder from '../../assets/avatar_placeholder_cat2.jpeg';
 
 import {
   Container,
   FirstRow,
   SecondRow,
-  WPModule,
-  BooleanButton,
-  ButtonContainer,
-  AddButton,
-  DeleteButton,
+  ModulesContainer,
+  ModuleContainer,
+  MessageField,
 } from './styles';
+import { useAuth } from '../../hooks/auth';
+import EditCompanyEmployeeInput from '../EditCompanyEmployeeInput';
+import EditEmployeeModulesWindow from '../EditEmployeeModulesWindow';
+
+interface IUserModules {
+  id: string;
+  management_module: string;
+  access_level: number;
+}
+
+interface IUserConfirmation {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  title: string;
+  message: string;
+  isConfirmed: boolean;
+}
 
 interface IEmployeeUserPersonInfoDTO {
   id: string;
@@ -37,160 +45,74 @@ interface IEmployeeUserPersonInfoDTO {
   person_id: string;
 }
 
-interface IContractWPModulesDTO {
+interface IUserEmployeeDTO {
   id: string;
   name: string;
+  position: string;
+  access_key: string;
+  email: string;
+  isActive: boolean;
+  employee_id: string;
+}
+
+interface IEmployeeInfo {
+  id: string;
+  position: string;
+  access_key: string;
+  email: string;
+  isActive: boolean;
+  title: string;
+  message: string;
+  isConfirmed: boolean;
+  confirmationID: string;
 }
 
 interface IPropsDTO {
-  wpCompanyContract: IWPContractOrderDTO;
-  wpModules: IContractWPModulesDTO[];
-  // eslint-disable-next-line react/require-default-props
-  employee: IEmployeeDTO;
-  // eslint-disable-next-line react/require-default-props
+  userEmployee: IUserEmployeeDTO;
   onHandleCloseWindow: MouseEventHandler;
-  handleCloseWindow: Function;
   getEmployees: Function;
-}
-
-interface IEmployeeWPModulesDTO {
-  management_module_id: string;
-  access_level: number;
 }
 
 const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
   onHandleCloseWindow,
-  handleCloseWindow,
   getEmployees,
-  wpCompanyContract,
-  employee,
-  wpModules,
+  userEmployee,
 }: IPropsDTO) => {
-  const { addToast } = useToast();
-  const formRef = useRef<FormHandles>(null);
+  const { company } = useAuth();
 
-  const wpCRM = wpModules.find(wpM => wpM.name === 'Comercial');
-  const wpProduction = wpModules.find(wpM => wpM.name === 'Operations');
-  const wpProject = wpModules.find(wpM => wpM.name === 'Projects');
-  const wpFinancial = wpModules.find(wpM => wpM.name === 'Financial');
-
-  const initialCRMaccess = employee.modules.find(
-    wpM => wpM.management_module_id === wpCRM?.id,
+  const [userConfirmation, setUserConfirmation] = useState(
+    {} as IUserConfirmation,
   );
-  const initialProductionaccess = employee.modules.find(
-    wpM => wpM.management_module_id === wpProduction?.id,
-  );
-  const initialProjectaccess = employee.modules.find(
-    wpM => wpM.management_module_id === wpProject?.id,
-  );
-  const initialFinancialaccess = employee.modules.find(
-    wpM => wpM.management_module_id === wpFinancial?.id,
-  );
+  const [userModules, setUserModules] = useState<IUserModules[]>([]);
+  const [selectedModule, setSelectedModule] = useState({} as IUserModules);
+  const [editModulesWindow, setEditModulesWindow] = useState(false);
+  const [positionInput, setPositionInput] = useState(false);
+  const [isActiveInput, setIsActiveInput] = useState(false);
+  const [accessKeyInput, setAccessKeyInput] = useState(false);
+  const [emailInput, setEmailInput] = useState(false);
+  const [titleInput, setTitleInput] = useState(false);
+  const [messageInput, setMessageInput] = useState(false);
+  const [crmAccessLevel, setCRMAccessLevel] = useState('-');
+  const [crmAccess, setCRMAccess] = useState(false);
+  const [operationsAccessLevel, setOperationsAccessLevel] = useState('-');
+  const [operationsAccess, setOperationsAccess] = useState(false);
+  const [projectsAccessLevel, setProjectsAccessLevel] = useState('-');
+  const [projectsAccess, setProjectsAccess] = useState(false);
+  const [financialAccessLevel, setFinancialAccessLevel] = useState('-');
+  const [financialAccess, setFinancialAccess] = useState(false);
+  const [employeeInfo, setEmployeeInfo] = useState({} as IEmployeeInfo);
 
-  const [employeeCRMLevel, setEmployeeCRMLevel] = useState(
-    initialCRMaccess ? initialCRMaccess.access_level : 0,
+  const [employeeUserInfo, setEmployeeUserInfo] = useState(
+    {} as IEmployeeUserPersonInfoDTO,
   );
-  const [employeeProductionLevel, setEmployeeProductionLevel] = useState(
-    initialProductionaccess ? initialProductionaccess.access_level : 0,
-  );
-  const [employeeProjectLevel, setEmployeeProjectLevel] = useState(
-    initialProjectaccess ? initialProjectaccess.access_level : 0,
-  );
-  const [employeeFinancialLevel, setEmployeeFinancialLevel] = useState(
-    initialFinancialaccess ? initialFinancialaccess.access_level : 0,
-  );
-  const [salaryInput, setSalaryInput] = useState(false);
-  const [employeeUserInfo, setEmployeeUserInfo] = useState<
-    IEmployeeUserPersonInfoDTO
-  >({} as IEmployeeUserPersonInfoDTO);
-
-  const inputHeight = { height: '40px' };
-  const employeeUserID = employee.employee.id;
-
-  const handleDeleteEmployee = useCallback(async () => {
-    try {
-      if (employee) {
-        await api.delete(`/supplier-employees/${employee.id}`);
-        getEmployees();
-        handleCloseWindow();
-        addToast({
-          type: 'success',
-          title: 'Contrato deletado com sucesso',
-          description: 'As informações do evento já foram atualizadas.',
-        });
-      }
-    } catch (err) {
-      throw new Error(err);
-    }
-  }, [employee, addToast, getEmployees, handleCloseWindow]);
-
-  const handleSubmit = useCallback(
-    async (data: IEmployeeDTO) => {
-      try {
-        const modules: IEmployeeWPModulesDTO[] = [];
-
-        employeeCRMLevel > 0 &&
-          modules.push({
-            management_module_id: wpCRM ? wpCRM.id : '',
-            access_level: employeeCRMLevel,
-          });
-        employeeFinancialLevel > 0 &&
-          modules.push({
-            management_module_id: wpFinancial ? wpFinancial.id : '',
-            access_level: employeeFinancialLevel,
-          });
-        employeeProductionLevel > 0 &&
-          modules.push({
-            management_module_id: wpProduction ? wpProduction.id : '',
-            access_level: employeeProductionLevel,
-          });
-        employeeProjectLevel > 0 &&
-          modules.push({
-            management_module_id: wpProject ? wpProject.id : '',
-            access_level: employeeProjectLevel,
-          });
-
-        await api.delete(`/supplier-employees/${employee.id}`);
-
-        await api.post(`supplier-employees/${employeeUserID}`, {
-          position: data.position,
-          modules,
-          request_message: data.confirmation.request_message,
-          salary: Number(data.confirmation.salary),
-        });
-
-        addToast({
-          type: 'success',
-          title: 'Colaborador editado com sucesso',
-          description: 'As informações já foram alteradas no seu dashboard.',
-        });
-        getEmployees();
-        handleCloseWindow();
-      } catch (err) {
-        addToast({
-          type: 'error',
-          title: 'Erro ao adicionar membro da festa',
-          description: 'Erro ao adicionar membro da festa, tente novamente.',
-        });
-        throw new Error(err);
-      }
-    },
-    [
-      addToast,
-      getEmployees,
-      employeeCRMLevel,
-      employeeFinancialLevel,
-      employeeProductionLevel,
-      employeeProjectLevel,
-      wpCRM,
-      wpFinancial,
-      wpProduction,
-      wpProject,
-      handleCloseWindow,
-      employeeUserID,
-      employee,
-    ],
-  );
+  const handleCloseEmployeeInput = useCallback(() => {
+    setPositionInput(false);
+    setIsActiveInput(false);
+    setAccessKeyInput(false);
+    setEmailInput(false);
+    setTitleInput(false);
+    setMessageInput(false);
+  }, []);
 
   const getEmployeePersonInfo = useCallback(() => {
     try {
@@ -206,50 +128,141 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
     getEmployeePersonInfo();
   }, [getEmployeePersonInfo]);
 
-  const hiredModules = useMemo(() => {
-    if (wpCompanyContract) {
-      const availableModules: IContractWPModulesDTO[] = wpCompanyContract.products.map(
-        product => {
-          const productName = wpModules.find(
-            xModule => xModule.name === product.weplanProduct.name,
-          );
-          if (productName?.id) {
-            return {
-              id: productName.id,
-              name: productName.name,
-            };
-          }
-          throw new Error('WPManagementModule not found.');
-        },
-      );
-
-      return availableModules;
+  const getUserModules = useCallback(() => {
+    try {
+      api
+        .get<IUserModules[]>(`user/modules/${userEmployee.id}`)
+        .then(response => {
+          setUserModules(response.data);
+        });
+    } catch (err) {
+      throw new Error(err);
     }
+  }, [userEmployee]);
 
-    throw new Error('WPManagementModule not found.');
-  }, [wpCompanyContract, wpModules]);
+  useEffect(() => {
+    getUserModules();
+  }, [getUserModules]);
+
+  const getUserConfirmation = useCallback(() => {
+    try {
+      api
+        .get<IUserConfirmation>(
+          `user/confirmations/${userEmployee.id}/${company.id}`,
+        )
+        .then(response => {
+          setUserConfirmation(response.data);
+        });
+    } catch (err) {
+      throw new Error(err);
+    }
+  }, [company, userEmployee]);
+
+  useEffect(() => {
+    getUserConfirmation();
+  }, [getUserConfirmation]);
+
+  const handleEditModulesWindow = useCallback(props => {
+    setSelectedModule(props);
+    setEditModulesWindow(true);
+  }, []);
+
+  const handleCloseEditModulesWindow = useCallback(() => {
+    setEditModulesWindow(false);
+  }, []);
+
+  useEffect(() => {
+    setEmployeeInfo({
+      id: userEmployee.id,
+      position: userEmployee.position,
+      access_key: userEmployee.access_key,
+      email: userEmployee.email,
+      isActive: userEmployee.isActive,
+      title: userConfirmation.title,
+      message: userConfirmation.message,
+      isConfirmed: userConfirmation.isConfirmed,
+      confirmationID: userConfirmation.id,
+    });
+  }, [userConfirmation, userEmployee]);
+
+  useEffect(() => {
+    userModules.map(thisModule => {
+      thisModule.management_module === 'Comercial' && setCRMAccess(true);
+      thisModule.management_module === 'Comercial' &&
+        thisModule.access_level === 1 &&
+        setCRMAccessLevel('Global');
+      thisModule.management_module === 'Comercial' &&
+        thisModule.access_level === 2 &&
+        setCRMAccessLevel('Equipe');
+      thisModule.management_module === 'Comercial' &&
+        thisModule.access_level === 3 &&
+        setCRMAccessLevel('Individual');
+      thisModule.management_module === 'Operations' &&
+        setOperationsAccess(true);
+      thisModule.management_module === 'Operations' &&
+        thisModule.access_level === 1 &&
+        setOperationsAccessLevel('Global');
+      thisModule.management_module === 'Operations' &&
+        thisModule.access_level === 2 &&
+        setOperationsAccessLevel('Equipe');
+      thisModule.management_module === 'Operations' &&
+        thisModule.access_level === 3 &&
+        setOperationsAccessLevel('Individual');
+      thisModule.management_module === 'Projects' && setProjectsAccess(true);
+      thisModule.management_module === 'Projects' &&
+        thisModule.access_level === 1 &&
+        setProjectsAccessLevel('Global');
+      thisModule.management_module === 'Projects' &&
+        thisModule.access_level === 2 &&
+        setProjectsAccessLevel('Equipe');
+      thisModule.management_module === 'Projects' &&
+        thisModule.access_level === 3 &&
+        setProjectsAccessLevel('Individual');
+      thisModule.management_module === 'Financial' && setFinancialAccess(true);
+      thisModule.management_module === 'Financial' &&
+        thisModule.access_level === 1 &&
+        setFinancialAccessLevel('Global');
+      thisModule.management_module === 'Financial' &&
+        thisModule.access_level === 2 &&
+        setFinancialAccessLevel('Equipe');
+      thisModule.management_module === 'Financial' &&
+        thisModule.access_level === 3 &&
+        setFinancialAccessLevel('Individual');
+      return thisModule;
+    });
+  }, [userModules]);
 
   return (
-    <WindowContainer
-      onHandleCloseWindow={onHandleCloseWindow}
-      containerStyle={{
-        zIndex: 20,
-        top: '5%',
-        left: '5%',
-        height: '90%',
-        width: '90%',
-      }}
-    >
-      <Form ref={formRef} onSubmit={handleSubmit}>
+    <>
+      {editModulesWindow && (
+        <EditEmployeeModulesWindow
+          onHandleCloseWindow={() => setEditModulesWindow(false)}
+          employeeID={employeeInfo.id}
+          handleCloseWindow={handleCloseEditModulesWindow}
+          moduleAccessLevel={selectedModule.access_level}
+          moduleName={selectedModule.management_module}
+          moduleID={selectedModule.id}
+        />
+      )}
+      <WindowContainer
+        onHandleCloseWindow={onHandleCloseWindow}
+        containerStyle={{
+          zIndex: 20,
+          top: '5%',
+          left: '5%',
+          height: '90%',
+          width: '90%',
+        }}
+      >
         <Container>
-          <h2>Editar Colaborador</h2>
+          <h2>Adicionar Colaborador</h2>
           <div>
             <FirstRow>
               <img src={avatarPlaceholder} alt="WePlanPRO Company Employee" />
               <div>
                 <span>
                   <strong>Nome de Usuário</strong>
-                  <p>{employee.employee.name}</p>
+                  <p>{userEmployee.name}</p>
                 </span>
                 <span>
                   <strong>Nome</strong>
@@ -260,245 +273,297 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
                 </span>
                 <span>
                   <strong>CPF</strong>
-                  <p>{employeeUserInfo.person_id}</p>
+                  <p>xxx.xxx.xxx-xx</p>
+                  {/* <p>{employeeUserInfo.person_id}</p> */}
                 </span>
               </div>
             </FirstRow>
             <SecondRow>
               <span>
                 <div>
-                  <p>Cargo</p>
-                  <Input
-                    defaultValue={employee.position}
-                    name="position"
-                    containerStyle={inputHeight}
-                  />
-                </div>
-                {!salaryInput ? (
-                  <div>
-                    <p>Definir Salário?</p>
-                    <ButtonContainer>
+                  <h3>Cargo</h3>
+                  {!positionInput ? (
+                    <td>
+                      {userEmployee.position}
                       <button
                         type="button"
-                        onClick={() => setSalaryInput(true)}
-                        style={{ backgroundColor: 'green' }}
+                        onClick={() => setPositionInput(true)}
                       >
-                        Sim
+                        <FiChevronRight size={30} />
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => setSalaryInput(false)}
-                        style={{ backgroundColor: 'red' }}
-                      >
-                        Não
-                      </button>
-                    </ButtonContainer>
-                  </div>
-                ) : (
-                  <div>
-                    <div>
-                      <p>Definir Salário</p>
-                      <button
-                        type="button"
-                        onClick={() => setSalaryInput(false)}
-                        style={{ backgroundColor: 'red' }}
-                      >
-                        Desfazer
-                      </button>
-                    </div>
-                    <Input
-                      name="confirmation.salary"
-                      type="number"
-                      containerStyle={inputHeight}
-                      defaultValue={employee.confirmation.salary}
+                    </td>
+                  ) : (
+                    <EditCompanyEmployeeInput
+                      inputName="position"
+                      defaultValue={userEmployee.position}
+                      getCompanyEmployees={getEmployees}
+                      handleCloseWindow={() => setPositionInput(false)}
+                      onHandleCloseWindow={handleCloseEmployeeInput}
+                      type="string"
+                      employeeInfo={employeeInfo}
                     />
-                  </div>
-                )}
+                  )}
+                </div>
                 <div>
-                  <p>Mensagem</p>
-                  <Input
-                    name="confirmation.request_message"
-                    containerStyle={inputHeight}
-                    defaultValue={employee.confirmation.request_message}
-                  />
+                  <h3>Status do Colaborador</h3>
+                  {!isActiveInput ? (
+                    <td>
+                      {userEmployee.isActive ? 'Ativo' : 'Desativado'}
+                      <button
+                        type="button"
+                        onClick={() => setIsActiveInput(true)}
+                      >
+                        <FiChevronRight size={30} />
+                      </button>
+                    </td>
+                  ) : (
+                    <EditCompanyEmployeeInput
+                      inputName="isActive"
+                      defaultValue={`${userEmployee.isActive}`}
+                      getCompanyEmployees={getEmployees}
+                      handleCloseWindow={() => setIsActiveInput(false)}
+                      onHandleCloseWindow={handleCloseEmployeeInput}
+                      type="boolean"
+                      employeeInfo={employeeInfo}
+                    />
+                  )}
+                </div>
+                <div>
+                  <h3>Chave de acesso</h3>
+                  {!accessKeyInput ? (
+                    <td>
+                      {userEmployee.access_key}
+                      <button
+                        type="button"
+                        onClick={() => setAccessKeyInput(true)}
+                      >
+                        <FiChevronRight size={30} />
+                      </button>
+                    </td>
+                  ) : (
+                    <EditCompanyEmployeeInput
+                      inputName="access_key"
+                      defaultValue={userEmployee.access_key}
+                      getCompanyEmployees={getEmployees}
+                      handleCloseWindow={() => setAccessKeyInput(false)}
+                      onHandleCloseWindow={handleCloseEmployeeInput}
+                      type="string"
+                      employeeInfo={employeeInfo}
+                    />
+                  )}
+                </div>
+                <div>
+                  <h3>Email de acesso</h3>
+                  {!emailInput ? (
+                    <td>
+                      {userEmployee.email}
+                      <button type="button" onClick={() => setEmailInput(true)}>
+                        <FiChevronRight size={30} />
+                      </button>
+                    </td>
+                  ) : (
+                    <EditCompanyEmployeeInput
+                      inputName="email"
+                      defaultValue={userEmployee.email}
+                      getCompanyEmployees={getEmployees}
+                      handleCloseWindow={() => setEmailInput(false)}
+                      onHandleCloseWindow={handleCloseEmployeeInput}
+                      type="string"
+                      employeeInfo={employeeInfo}
+                    />
+                  )}
                 </div>
               </span>
               <span>
-                <h3>Acessos</h3>
-                {hiredModules ? (
+                <ModulesContainer>
                   <span>
-                    {hiredModules.map(xModule => (
-                      <WPModule key={xModule.id}>
-                        <strong>{xModule.name}</strong>
-                        {xModule.name === 'Comercial' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeCRMLevel === 1}
-                              onClick={() =>
-                                setEmployeeCRMLevel(
-                                  employeeCRMLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeCRMLevel === 2}
-                              onClick={() =>
-                                setEmployeeCRMLevel(
-                                  employeeCRMLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeCRMLevel === 3}
-                              onClick={() =>
-                                setEmployeeCRMLevel(
-                                  employeeCRMLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                        {xModule.name === 'Financial' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeFinancialLevel === 1}
-                              onClick={() =>
-                                setEmployeeFinancialLevel(
-                                  employeeFinancialLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeFinancialLevel === 2}
-                              onClick={() =>
-                                setEmployeeFinancialLevel(
-                                  employeeFinancialLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeFinancialLevel === 3}
-                              onClick={() =>
-                                setEmployeeFinancialLevel(
-                                  employeeFinancialLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                        {xModule.name === 'Operations' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProductionLevel === 1}
-                              onClick={() =>
-                                setEmployeeProductionLevel(
-                                  employeeProductionLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProductionLevel === 2}
-                              onClick={() =>
-                                setEmployeeProductionLevel(
-                                  employeeProductionLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProductionLevel === 3}
-                              onClick={() =>
-                                setEmployeeProductionLevel(
-                                  employeeProductionLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                        {xModule.name === 'Projects' && (
-                          <div>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProjectLevel === 1}
-                              onClick={() =>
-                                setEmployeeProjectLevel(
-                                  employeeProjectLevel === 1 ? 0 : 1,
-                                )
-                              }
-                            >
-                              Acesso Total
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProjectLevel === 2}
-                              onClick={() =>
-                                setEmployeeProjectLevel(
-                                  employeeProjectLevel === 2 ? 0 : 2,
-                                )
-                              }
-                            >
-                              Acesso por Equipe
-                            </BooleanButton>
-                            <BooleanButton
-                              type="button"
-                              isActive={employeeProjectLevel === 3}
-                              onClick={() =>
-                                setEmployeeProjectLevel(
-                                  employeeProjectLevel === 3 ? 0 : 3,
-                                )
-                              }
-                            >
-                              Acesso Individual
-                            </BooleanButton>
-                          </div>
-                        )}
-                      </WPModule>
-                    ))}
+                    <ModuleContainer>
+                      <h3>Comercial</h3>
+                      {crmAccess ? (
+                        userModules.map(thisModule => {
+                          if (thisModule.management_module === 'Comercial') {
+                            return (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleEditModulesWindow(thisModule)
+                                }
+                              >
+                                {crmAccessLevel}
+                              </button>
+                            );
+                          }
+                          return '';
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEditModulesWindow({
+                              id: '',
+                              management_module: 'Comercial',
+                              access_level: 0,
+                            })
+                          }
+                        >
+                          {operationsAccessLevel}
+                        </button>
+                      )}
+                    </ModuleContainer>
+                    <ModuleContainer>
+                      <h3>Operações</h3>
+                      {operationsAccess ? (
+                        userModules.map(thisModule => {
+                          if (thisModule.management_module === 'Operations') {
+                            return (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleEditModulesWindow(thisModule)
+                                }
+                              >
+                                {operationsAccessLevel}
+                              </button>
+                            );
+                          }
+                          return '';
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEditModulesWindow({
+                              id: '',
+                              management_module: 'Operations',
+                              access_level: 0,
+                            })
+                          }
+                        >
+                          {operationsAccessLevel}
+                        </button>
+                      )}
+                    </ModuleContainer>
                   </span>
-                ) : (
                   <span>
-                    <strong>Você ainda não possui módulos de gestão</strong>
-                    <button type="button">Eu quero vencer!</button>
+                    <ModuleContainer>
+                      <h3>Projetos</h3>
+                      {projectsAccess ? (
+                        userModules.map(thisModule => {
+                          if (thisModule.management_module === 'Projects') {
+                            return (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleEditModulesWindow(thisModule)
+                                }
+                              >
+                                {projectsAccessLevel}
+                              </button>
+                            );
+                          }
+                          return '';
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEditModulesWindow({
+                              id: '',
+                              management_module: 'Projects',
+                              access_level: 0,
+                            })
+                          }
+                        >
+                          {projectsAccessLevel}
+                        </button>
+                      )}
+                    </ModuleContainer>
+                    <ModuleContainer>
+                      <h3>Financeiro</h3>
+                      {financialAccess ? (
+                        userModules.map(thisModule => {
+                          if (thisModule.management_module === 'Financial') {
+                            return (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleEditModulesWindow(thisModule)
+                                }
+                              >
+                                {financialAccessLevel}
+                              </button>
+                            );
+                          }
+                          return '';
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleEditModulesWindow({
+                              id: '',
+                              management_module: 'Financial',
+                              access_level: 0,
+                            })
+                          }
+                        >
+                          {financialAccessLevel}
+                        </button>
+                      )}
+                    </ModuleContainer>
                   </span>
-                )}
+                </ModulesContainer>
+                <div>
+                  <h3>Título da Mensagem</h3>
+                  {!titleInput ? (
+                    <td>
+                      {userConfirmation.title}
+                      <button type="button" onClick={() => setTitleInput(true)}>
+                        <FiChevronRight size={30} />
+                      </button>
+                    </td>
+                  ) : (
+                    <EditCompanyEmployeeInput
+                      inputName="title"
+                      defaultValue={userConfirmation.title}
+                      getCompanyEmployees={getUserConfirmation}
+                      handleCloseWindow={() => setTitleInput(false)}
+                      onHandleCloseWindow={handleCloseEmployeeInput}
+                      type="string"
+                      employeeInfo={employeeInfo}
+                    />
+                  )}
+                </div>
+                <MessageField>
+                  <h3>Mensagem</h3>
+                  {!messageInput ? (
+                    <td>
+                      {userConfirmation.message}
+                      <button
+                        type="button"
+                        onClick={() => setMessageInput(true)}
+                      >
+                        <FiChevronRight size={30} />
+                      </button>
+                    </td>
+                  ) : (
+                    <EditCompanyEmployeeInput
+                      inputName="message"
+                      defaultValue={userConfirmation.message}
+                      getCompanyEmployees={getUserConfirmation}
+                      handleCloseWindow={() => setMessageInput(false)}
+                      onHandleCloseWindow={handleCloseEmployeeInput}
+                      type="string"
+                      employeeInfo={employeeInfo}
+                    />
+                  )}
+                </MessageField>
               </span>
             </SecondRow>
           </div>
-          {!!employee && (
-            <DeleteButton type="button" onClick={handleDeleteEmployee}>
-              Deletar Contrato
-            </DeleteButton>
-          )}
-          <AddButton type="submit">Salvar alterações</AddButton>
         </Container>
-      </Form>
-    </WindowContainer>
+      </WindowContainer>
+    </>
   );
 };
 

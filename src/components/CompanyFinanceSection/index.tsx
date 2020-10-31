@@ -11,21 +11,7 @@ import {
 } from './styles';
 import { numberFormat } from '../../utils/numberFormat';
 
-interface IPropsDTO {
-  isOwner: boolean;
-  hiredSuppliers: ISelectedSupplierDTO[];
-  refreshHiredSuppliers: Function;
-}
-
-const CompanyFinanceSection: React.FC<IPropsDTO> = ({
-  isOwner,
-  hiredSuppliers,
-  refreshHiredSuppliers,
-}: IPropsDTO) => {
-  console.log(isOwner);
-  console.log(hiredSuppliers);
-  console.log(refreshHiredSuppliers);
-
+const CompanyFinanceSection: React.FC = () => {
   const [supplierTransactions, setSupplierTransactions] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<
     ISelectedSupplierDTO

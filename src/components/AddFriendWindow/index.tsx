@@ -26,7 +26,7 @@ const AddFriendWindow: React.FC<IPropsDTO> = ({
   handleFriendLists,
 }: IPropsDTO) => {
   const { addToast } = useToast();
-  const { user } = useAuth();
+  const { company } = useAuth();
 
   const [users, setUsers] = useState<IUserDTO[]>([]);
   const [friendId, setFriendId] = useState('');
@@ -36,7 +36,7 @@ const AddFriendWindow: React.FC<IPropsDTO> = ({
       try {
         api.get<IUserDTO[]>(`/users?name=${props}`).then(response => {
           const allUsers = response.data.filter(
-            thisUser => thisUser.id !== user.id,
+            thisUser => thisUser.id !== company.id,
           );
           setUsers(allUsers);
         });
@@ -44,7 +44,7 @@ const AddFriendWindow: React.FC<IPropsDTO> = ({
         throw new Error(err);
       }
     },
-    [user],
+    [company],
   );
 
   const handleSelectUser = useCallback(
