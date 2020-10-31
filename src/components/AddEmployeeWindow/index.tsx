@@ -1,7 +1,6 @@
 import React, { MouseEventHandler, useCallback, useState } from 'react';
 import { MdSearch } from 'react-icons/md';
 import IUserDTO from '../../dtos/IUserDTO';
-import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
 import CompanyEmployeeForm from '../CompanyEmployeeForm';
 import WindowContainer from '../WindowContainer';
@@ -17,8 +16,6 @@ const AddEmployeeWindow: React.FC<IPropsDTO> = ({
   onHandleCloseWindow,
   getEmployees,
 }: IPropsDTO) => {
-  const { person } = useAuth();
-
   const [users, setUsers] = useState<IUserDTO[]>([]);
   const [addEmployeeFormWindow, setAddEmployeeFormWindow] = useState(false);
   const [userEmployee, setUserEmployee] = useState<IUserDTO>({} as IUserDTO);
@@ -34,21 +31,16 @@ const AddEmployeeWindow: React.FC<IPropsDTO> = ({
     [userEmployee],
   );
 
-  const handleGetUsers = useCallback(
-    (props: string) => {
-      try {
-        api.get<IUserDTO[]>(`/users?name=${props}`).then(response => {
-          const allUsers = response.data.filter(
-            thisUser => thisUser.id !== person.id,
-          );
-          setUsers(allUsers);
-        });
-      } catch (err) {
-        throw new Error(err);
-      }
-    },
-    [person],
-  );
+  const handleGetUsers = useCallback((props: string) => {
+    try {
+      api.get<IUserDTO[]>(`/users?name=${props}`).then(response => {
+        const allUsers = response.data.filter(thisUser => !thisUser.isCompany);
+        setUsers(allUsers);
+      });
+    } catch (err) {
+      throw new Error(err);
+    }
+  }, []);
 
   const handleAddEmployee = useCallback(async () => {
     setAddEmployeeFormWindow(true);

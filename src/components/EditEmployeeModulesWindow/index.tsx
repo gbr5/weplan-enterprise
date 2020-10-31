@@ -30,7 +30,6 @@ const EditEmployeeModulesWindow: React.FC<IPropsDTO> = ({
 
   const handleDeleteModule = useCallback(async () => {
     try {
-      console.log(moduleID);
       if (moduleAccessLevel !== 0 && moduleID) {
         await api.delete(`user/modules/${moduleID}`);
 

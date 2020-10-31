@@ -30,7 +30,6 @@ const AddMasterUserWindow: React.FC<IPropsDTO> = ({
 
   const [users, setUsers] = useState<IUserDTO[]>([]);
   const [masterUser, setMasterUser] = useState<IUserDTO>({} as IUserDTO);
-  console.log(masterUser);
 
   const handleSelectUser = useCallback(
     (props: IUserDTO) => {
@@ -60,13 +59,11 @@ const AddMasterUserWindow: React.FC<IPropsDTO> = ({
   );
 
   const handleAddMasterUser = useCallback(async () => {
-    console.log(company, masterUser);
     try {
       await api.post(`suppliers/master/user/${company.id}/${masterUser.id}`, {
         email: `${masterUser.name}@${masterUser.name}.com`,
         password: masterUser.name,
       });
-      console.log(company, masterUser);
 
       getMasterUsers();
       handleMessageWindow();
