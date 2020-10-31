@@ -7,7 +7,6 @@ import React, {
 import { FiChevronRight } from 'react-icons/fi';
 
 import WindowContainer from '../WindowContainer';
-import AddEmployeeModulesWindow from '../AddEmployeeModulesWindow';
 
 import api from '../../services/api';
 import avatarPlaceholder from '../../assets/avatar_placeholder_cat2.jpeg';
@@ -16,7 +15,6 @@ import {
   Container,
   FirstRow,
   SecondRow,
-  BooleanButton,
   ModulesContainer,
   ModuleContainer,
   MessageField,
@@ -82,15 +80,12 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
 }: IPropsDTO) => {
   const { company } = useAuth();
 
-  const [modulesWindow, setModulesWindow] = useState(false);
   const [userConfirmation, setUserConfirmation] = useState(
     {} as IUserConfirmation,
   );
   const [userModules, setUserModules] = useState<IUserModules[]>([]);
   const [selectedModule, setSelectedModule] = useState({} as IUserModules);
   const [editModulesWindow, setEditModulesWindow] = useState(false);
-  const [moduleName, setModuleName] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
   const [positionInput, setPositionInput] = useState(false);
   const [isActiveInput, setIsActiveInput] = useState(false);
   const [accessKeyInput, setAccessKeyInput] = useState(false);
@@ -107,11 +102,6 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
   const [financialAccess, setFinancialAccess] = useState(false);
   const [employeeInfo, setEmployeeInfo] = useState({} as IEmployeeInfo);
 
-  const handleModulesWindow = useCallback((props: string) => {
-    setModuleName(props);
-    setModulesWindow(true);
-  }, []);
-
   const [employeeUserInfo, setEmployeeUserInfo] = useState(
     {} as IEmployeeUserPersonInfoDTO,
   );
@@ -122,10 +112,6 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
     setEmailInput(false);
     setTitleInput(false);
     setMessageInput(false);
-  }, []);
-
-  const handleCloseModulesWindow = useCallback(() => {
-    setModulesWindow(false);
   }, []);
 
   const getEmployeePersonInfo = useCallback(() => {
@@ -248,14 +234,6 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
 
   return (
     <>
-      {modulesWindow && (
-        <AddEmployeeModulesWindow
-          employeeID={employeeId}
-          handleCloseWindow={() => setModulesWindow(false)}
-          moduleName={moduleName}
-          onHandleCloseWindow={handleCloseModulesWindow}
-        />
-      )}
       {editModulesWindow && (
         <EditEmployeeModulesWindow
           onHandleCloseWindow={() => setEditModulesWindow(false)}
@@ -496,7 +474,7 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
                             })
                           }
                         >
-                          {operationsAccessLevel}
+                          {projectsAccessLevel}
                         </button>
                       )}
                     </ModuleContainer>
@@ -529,7 +507,7 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
                             })
                           }
                         >
-                          {operationsAccessLevel}
+                          {financialAccessLevel}
                         </button>
                       )}
                     </ModuleContainer>
