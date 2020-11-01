@@ -14,8 +14,8 @@ import SupplierDashboard from '../pages/SupplierDashboard';
 const Routes: React.FC = () => {
   return (
     <Switch>
-      <Route path="/" exact component={SignUp} />
-      <Route path="/signin" exact component={SignIn} />
+      <Route path="/" exact component={SignIn} />
+      <Route path="/signup" exact component={SignUp} />
       <Route path="/person-signup" exact component={PersonSignUp} />
       <Route path="/forgot-password" exact component={ForgotPassword} />
       <Route path="/reset-password" exact component={ResetPassword} />

@@ -22,13 +22,12 @@ interface ICompanyInfoDTO {
 const SupplierPageHeader: React.FC = () => {
   const { colors } = useContext(ThemeContext);
   const history = useHistory();
-  const { company, companyInfo } = useAuth();
+  const { company, companyInfo, signOut } = useAuth();
 
   const [helpWindow, setHelpWindow] = useState(false);
   const [settingsWindow, setSettingsWindow] = useState(false);
   // const [supplierLogo, setSupplierLogo] = useState('');
 
-  const { signOut } = useAuth();
   const { toggleTheme, themeBoolean } = useToggleTheme();
 
   const handleNavigateToDashboard = useCallback(() => {

@@ -300,7 +300,7 @@ const SignUp: React.FC = () => {
       <Container>
         <ToggleButton>
           <h3>Cadastro</h3>
-          <Link to="/signin">
+          <Link to="/">
             <h2>Login</h2>
           </Link>
         </ToggleButton>
@@ -354,12 +354,18 @@ const SignUp: React.FC = () => {
                   <Button type="submit">Cadastrar</Button>
                 </Form>
                 <Link to="/person-signup">
-                  <p>Antes de cadastrar sua empresa, faça o seu cadastro no</p>{' '}
-                  <strong>WePlan | PRO</strong>
+                  <p>
+                    Antes de cadastrar sua empresa, faça o seu cadastro como
+                  </p>{' '}
+                  <h6>
+                    WePlan <strong>|</strong> Master
+                  </h6>
                 </Link>
                 <a href="https://www.weplan.party" target="blank">
-                  Se você não é fornecedor acesse{' '}
-                  <strong>WePlan | Party</strong>
+                  <h6>
+                    Se você não é fornecedor acesse <strong>WePlan</strong> |
+                    <strong> Party</strong>
+                  </h6>
                 </a>
               </>
             )}

@@ -204,7 +204,7 @@ const PersonSignUp: React.FC = () => {
     <Container>
       <ToggleButton>
         <h3>Cadastro</h3>
-        <Link to="/signin">
+        <Link to="/">
           <h2>Login</h2>
         </Link>
       </ToggleButton>
@@ -214,12 +214,13 @@ const PersonSignUp: React.FC = () => {
           {!!options && (
             <>
               <h1>
-                WePlan <strong>PRO</strong>
+                WePlan <strong>Enterprise</strong>
               </h1>
               <Form ref={formRef} onSubmit={handleSubmit}>
                 <div>
-                  <h3>Work</h3> <h1>SMART!</h1>
+                  <h3>Usuário</h3> <h1>MASTER</h1>
                 </div>
+                <h2>Cadastro</h2>
 
                 <Input
                   name="name"
@@ -253,10 +254,10 @@ const PersonSignUp: React.FC = () => {
                 <Button type="submit">Cadastrar</Button>
               </Form>
               <div>
-                <Link to="/">
+                <Link to="/signup">
                   <p>Cadastrar empresa</p>
                 </Link>
-                <Link to="/signin">Fazer login</Link>
+                <Link to="/">Fazer login</Link>
               </div>
             </>
           )}
