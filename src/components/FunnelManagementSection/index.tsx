@@ -19,17 +19,13 @@ interface ICreateFunnelStage {
 }
 
 const FunnelManagementSection: React.FC = () => {
-  const { modules, company } = useAuth();
+  const { company } = useAuth();
   const { addToast } = useToast();
 
-  const [funnelType, setFunnelType] = useState('');
-  const [funnelId, setFunnelId] = useState('');
   const [comercialStagesSection, setComercialStagesSection] = useState(false);
   const [operationsStagesSection, setOperationsStagesSection] = useState(false);
   const [projectsStagesSection, setProjectsStagesSection] = useState(false);
   const [financialStagesSection, setFinancialStagesSection] = useState(false);
-  const [addFunnelWindow, setAddFunnelWindow] = useState(false);
-  const [addStageWindow, setAddStageWindow] = useState(false);
   const [comercialFunnel, setComercialFunnel] = useState({} as IFunnelDTO);
   const [operationsFunnel, setOperationsFunnel] = useState({} as IFunnelDTO);
   const [projectsFunnel, setProjectsFunnel] = useState({} as IFunnelDTO);
@@ -75,43 +71,12 @@ const FunnelManagementSection: React.FC = () => {
   useEffect(() => {
     getFunnels();
   }, [getFunnels]);
-  console.log(comercialFunnel);
-  console.log(projectsFunnel);
 
-  useEffect(() => {
-    if (!comercialFunnel) {
-      setFunnelType('Comercial');
-      setAddFunnelWindow(true);
-      console.log('Contagem1');
-      return comercialFunnel;
-    }
-    if (!operationsFunnel) {
-      setFunnelType('Operations');
-      setAddFunnelWindow(true);
-      console.log('Contagem2');
-      return operationsFunnel;
-    }
-    if (!projectsFunnel) {
-      setFunnelType('Projects');
-      setAddFunnelWindow(true);
-      console.log('Contagem3');
-      return projectsFunnel;
-    }
-    if (!financialFunnel) {
-      setFunnelType('Financial');
-      setAddFunnelWindow(true);
-      console.log('Contagem4');
-      return financialFunnel;
-    }
-
-    return console.log('Contagem');
-  }, [comercialFunnel, operationsFunnel, projectsFunnel, financialFunnel]);
-  console.log(funnelType);
   return (
     <Container>
       <Funnel isActive={false}>
         <h3>Comercial</h3>
-        <span>{comercialFunnel?.name}</span>
+        <span>{comercialFunnel.name}</span>
         <button
           type="button"
           onClick={() => setComercialStagesSection(!comercialStagesSection)}
