@@ -32,6 +32,7 @@ import { useToast } from '../../hooks/toast';
 import SupplierPageHeader from '../SupplierPageHeader';
 import EditCompanyEmployeeForm from '../EditCompanyEmployeeForm';
 import WPContractOrderForm from '../WPContractOrderForm';
+import FunnelManagementSection from '../FunnelManagementSection';
 
 interface IUserEmployeeDTO {
   id: string;
@@ -94,10 +95,10 @@ const CompanyDashboard: React.FC = () => {
     modules,
     updateCompany,
     updateCompanyInfo,
+    updateModules,
   } = useAuth();
 
   const { addToast } = useToast();
-
   // 1
   const [companyNameInput, setCompanyNameInput] = useState(false);
   // 2
@@ -112,10 +113,6 @@ const CompanyDashboard: React.FC = () => {
     {} as ICompanyInformationDTO,
   );
 
-  const [companyWPContracts, setCompanyWPContracts] = useState<
-    IWPContractOrder[]
-  >([]);
-  console.log(companyWPContracts);
   const [dashboardTitle, setDashboardTitle] = useState(
     'Informações da Empresa',
   );
@@ -135,9 +132,10 @@ const CompanyDashboard: React.FC = () => {
     [],
   );
   // 1
-  const [companyInfoSection, setCompanyInfoSection] = useState(true);
+  const [companyInfoSection, setCompanyInfoSection] = useState(false);
   // 2
   const [employeesSection, setEmployeesSection] = useState(false);
+  const [funnelsSection, setFunnelsSection] = useState(true);
   // 3
   const [financialSection, setFinancialSection] = useState(false);
   // 4
@@ -179,6 +177,7 @@ const CompanyDashboard: React.FC = () => {
     setCompanyInfoSection(false);
     // 2 -1
     setEmployeesSection(false);
+    setFunnelsSection(false);
     // 3 -1
     setFinancialSection(false);
     // 4 -1
@@ -217,6 +216,10 @@ const CompanyDashboard: React.FC = () => {
     closeAllWindow();
     setEmployeesSection(true);
   }, [closeAllWindow]);
+  const handleFunnelsWindow = useCallback(() => {
+    closeAllWindow();
+    setFunnelsSection(true);
+  }, [closeAllWindow]);
   const handleFinanceWindow = useCallback(() => {
     closeAllWindow();
     setFinancialSection(true);
@@ -247,6 +250,12 @@ const CompanyDashboard: React.FC = () => {
         addToast({
           type: 'success',
           title: 'Avatar atualizado com sucesso.',
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: 'Erro ao editar avatar',
+          description: 'Erro ao avatar da empresa, tente novamente.',
         });
       }
     },
@@ -299,15 +308,83 @@ const CompanyDashboard: React.FC = () => {
             });
             return sortModules;
           });
-          setCompanyWPContracts(response.data);
+          sortModules.map(sortedModule => {
+            const foundModule = modules.find(
+              thisModule =>
+                thisModule.management_module === sortedModule.management_module,
+            );
+            if (foundModule === undefined) {
+              api.post(`funnels/${company.id}`, {
+                name: 'first',
+                funnel_type: sortedModule.management_module,
+              });
+            }
+            return sortedModule;
+          });
+          updateModules(sortModules);
+          // setCompanyWPContracts(response.data);
         });
     } catch (err) {
       throw new Error(err);
     }
-  }, [company]);
+  }, [company, modules, updateModules]);
+
+  const getCompanyFunnels = useCallback(() => {
+    try {
+      api
+        .get<IWPContractOrder[]>(`/wp/contract-orders/${company.id}`)
+        .then(response => {
+          if (response.data.length <= 0) {
+            setChooseWPproductMessageWindow(true);
+          }
+          const sortModules: IContractWPModulesDTO[] = [];
+          response.data.map(hModule => {
+            hModule.products.map(mProduct => {
+              const pName = mProduct.weplanProduct.name;
+              if (
+                pName === 'Comercial' ||
+                pName === 'Operations' ||
+                pName === 'Financial' ||
+                pName === 'Projects'
+              ) {
+                const findModules = sortModules.find(
+                  sModule => sModule.management_module === pName,
+                );
+                if (findModules === undefined) {
+                  sortModules.push({
+                    id: mProduct.weplanProduct.id,
+                    management_module: mProduct.weplanProduct.name,
+                  });
+                }
+              } else {
+                setMarketPlace(true);
+              }
+              return mProduct;
+            });
+            return sortModules;
+          });
+          sortModules.map(sortedModule => {
+            const foundModule = modules.find(
+              thisModule =>
+                thisModule.management_module === sortedModule.management_module,
+            );
+            if (foundModule === undefined) {
+              api.post(`funnels/${company.id}`, {
+                name: 'first',
+                funnel_type: sortedModule.management_module,
+              });
+            }
+            return sortedModule;
+          });
+          // setCompanyWPContracts(response.data);
+        });
+    } catch (err) {
+      throw new Error(err);
+    }
+  }, [company, modules]);
   useEffect(() => {
-    getCompanyWPContractOrders();
-  }, [getCompanyWPContractOrders]);
+    getCompanyFunnels();
+  }, [getCompanyFunnels]);
 
   const getCompanyEmployees = useCallback(() => {
     try {
@@ -433,6 +510,12 @@ const CompanyDashboard: React.FC = () => {
         addToast({
           type: 'success',
           title: 'Logo atualizado com sucesso.',
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: 'Erro ao editar logo',
+          description: 'Erro ao logo da empresa, tente novamente.',
         });
       }
     },
@@ -596,6 +679,9 @@ const CompanyDashboard: React.FC = () => {
         <SideMenu>
           <button type="button" onClick={handleInitialWindow}>
             Informações da empresa
+          </button>
+          <button type="button" onClick={handleFunnelsWindow}>
+            Funil
           </button>
           <button type="button" onClick={handleEmployeesWindow}>
             Colaboradores
@@ -920,6 +1006,7 @@ const CompanyDashboard: React.FC = () => {
                 </UnConfirmedEmployeeSection>
               </EmployeeSection>
             )}
+            {!!funnelsSection && <FunnelManagementSection />}
             {!!financialSection && (
               <Section>
                 <h1>Financeiro</h1>

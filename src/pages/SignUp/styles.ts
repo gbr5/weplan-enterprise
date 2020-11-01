@@ -91,10 +91,16 @@ export const AnimationContainer = styled.div`
       border-bottom: 1px solid var(--primary-color);
     }
 
-    strong {
+    h6 {
       color: var(--title-color);
       line-height: 40px;
       transition: 0.3s;
+      font-size: 24px;
+      strong {
+        color: green;
+        font-weight: 500;
+        transition: 0.5s;
+      }
     }
 
     &:hover {
@@ -103,19 +109,39 @@ export const AnimationContainer = styled.div`
       p {
         color: var(--primary-color);
       }
-      strong {
+      h6 {
         color: green;
+        strong {
+          color: var(--title-color);
+          font-weight: 500;
+          transition: 0.3s;
+          font-size: 28px;
+        }
       }
     }
   }
   a + a {
-    strong {
-      color: green;
+    font-size: 16px;
+    h6 {
+      color: var(--title-color);
       transition: 0.3s;
-    }
-    &:hover {
+      font-size: 18px;
       strong {
         color: var(--primary-color);
+        font-weight: 500;
+        transition: 0.3s;
+        font-size: 20px;
+      }
+    }
+    &:hover {
+      h6 {
+        color: var(--primary-color);
+        strong {
+          color: var(--title-color);
+          font-weight: 500;
+          transition: 0.3s;
+          font-size: 22px;
+        }
       }
     }
   }
@@ -150,9 +176,10 @@ export const AnimationContainer = styled.div`
 
   h1 {
     color: var(--primary-color);
-    font-size: 60px;
+    font-size: 40px;
 
     strong {
+      font-size: 40px;
       color: var(--title-color);
     }
   }

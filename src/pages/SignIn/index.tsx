@@ -81,7 +81,7 @@ const SignIn: React.FC = () => {
   return (
     <Container>
       <ToggleButton>
-        <Link to="/">
+        <Link to="/signup">
           <h2>Cadastro</h2>
         </Link>
         <h3>Login</h3>
@@ -123,7 +123,7 @@ const SignIn: React.FC = () => {
             <a href="https://www.weplan.pro" target="blank">
               Cadastro de Planners
             </a>
-            <Link to="/">Cadastro de Empresas</Link>
+            <Link to="/signup">Cadastro de Empresas</Link>
           </div>
         </AnimationContainer>
       </Content>

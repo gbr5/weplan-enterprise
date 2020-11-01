@@ -65,13 +65,13 @@ const AuthContext = createContext<IAuthContextData>({} as IAuthContextData);
 
 const AuthProvider: React.FC = ({ children }) => {
   const [data, setData] = useState<IAuthState>(() => {
-    const token = localStorage.getItem('@WePlan:token');
-    const userMaster = localStorage.getItem('@WePlan:userMaster');
-    const company = localStorage.getItem('@WePlan:company');
-    const companyInfo = localStorage.getItem('@WePlan:companyInfo');
-    const person = localStorage.getItem('@WePlan:person');
-    const personInfo = localStorage.getItem('@WePlan:personInfo');
-    const modules = localStorage.getItem('@WePlan:modules');
+    const token = localStorage.getItem(`@WP-Enterprise:token`);
+    const userMaster = localStorage.getItem(`@WP-Enterprise:userMaster`);
+    const company = localStorage.getItem(`@WP-Enterprise:company`);
+    const companyInfo = localStorage.getItem(`@WP-Enterprise:companyInfo`);
+    const person = localStorage.getItem(`@WP-Enterprise:person`);
+    const personInfo = localStorage.getItem(`@WP-Enterprise:personInfo`);
+    const modules = localStorage.getItem(`@WP-Enterprise:modules`);
 
     if (
       token &&
@@ -99,13 +99,13 @@ const AuthProvider: React.FC = ({ children }) => {
   });
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@WePlan:token');
-    localStorage.removeItem('@WePlan:userMaster');
-    localStorage.removeItem('@WePlan:company');
-    localStorage.removeItem('@WePlan:companyInfo');
-    localStorage.removeItem('@WePlan:person');
-    localStorage.removeItem('@WePlan:personInfo');
-    localStorage.removeItem('@WePlan:modules');
+    localStorage.removeItem(`@WP-Enterprise:token`);
+    localStorage.removeItem(`@WP-Enterprise:userMaster`);
+    localStorage.removeItem(`@WP-Enterprise:company`);
+    localStorage.removeItem(`@WP-Enterprise:companyInfo`);
+    localStorage.removeItem(`@WP-Enterprise:person`);
+    localStorage.removeItem(`@WP-Enterprise:personInfo`);
+    localStorage.removeItem(`@WP-Enterprise:modules`);
 
     setData({} as IAuthState);
   }, []);
@@ -126,16 +126,16 @@ const AuthProvider: React.FC = ({ children }) => {
       modules,
     } = response.data;
 
-    localStorage.setItem('@WePlan:token', token);
+    localStorage.setItem(`@WP-Enterprise:token`, token);
     localStorage.setItem(
-      '@WePlan:userMaster',
+      `@WP-Enterprise:userMaster`,
       JSON.stringify({
         id: userMaster.id,
         email: userMaster.email,
       }),
     );
     localStorage.setItem(
-      '@WePlan:person',
+      `@WP-Enterprise:person`,
       JSON.stringify({
         id: person.id,
         name: person.name,
@@ -144,7 +144,7 @@ const AuthProvider: React.FC = ({ children }) => {
       }),
     );
     localStorage.setItem(
-      '@WePlan:personInfo',
+      `@WP-Enterprise:personInfo`,
       JSON.stringify({
         first_name: personInfo.first_name,
         last_name: personInfo.last_name,
@@ -152,7 +152,7 @@ const AuthProvider: React.FC = ({ children }) => {
       }),
     );
     localStorage.setItem(
-      '@WePlan:company',
+      `@WP-Enterprise:company`,
       JSON.stringify({
         id: company.id,
         name: company.name,
@@ -161,14 +161,14 @@ const AuthProvider: React.FC = ({ children }) => {
       }),
     );
     localStorage.setItem(
-      '@WePlan:companyInfo',
+      `@WP-Enterprise:companyInfo`,
       JSON.stringify({
-        name: company.name,
-        logo_url: company.logo_url,
-        company_id: company.company_id,
+        name: companyInfo.name,
+        logo_url: companyInfo.logo_url,
+        company_id: companyInfo.company_id,
       }),
     );
-    localStorage.setItem('@WePlan:modules', JSON.stringify(modules));
+    localStorage.setItem(`@WP-Enterprise:modules`, JSON.stringify(modules));
 
     api.defaults.headers.authorization = `Bearer ${token}`;
 
@@ -185,7 +185,10 @@ const AuthProvider: React.FC = ({ children }) => {
 
   const updateCompany = useCallback(
     (updatedUser: IUser) => {
-      localStorage.setItem('@WePlan:company', JSON.stringify(updatedUser));
+      localStorage.setItem(
+        `@WP-Enterprise:company`,
+        JSON.stringify(updatedUser),
+      );
 
       setData({
         token: data.token,
@@ -201,7 +204,10 @@ const AuthProvider: React.FC = ({ children }) => {
   );
   const updateUserMaster = useCallback(
     (updatedUser: ICompanyMaster) => {
-      localStorage.setItem('@WePlan:userMaster', JSON.stringify(updatedUser));
+      localStorage.setItem(
+        `@WP-Enterprise:userMaster`,
+        JSON.stringify(updatedUser),
+      );
 
       setData({
         token: data.token,
@@ -218,7 +224,7 @@ const AuthProvider: React.FC = ({ children }) => {
   const updateCompanyInfo = useCallback(
     (updatedCompanyInfo: ICompanyInfo) => {
       localStorage.setItem(
-        '@WePlan:companyInfo',
+        `@WP-Enterprise:companyInfo`,
         JSON.stringify(updatedCompanyInfo),
       );
 
@@ -236,7 +242,10 @@ const AuthProvider: React.FC = ({ children }) => {
   );
   const updateModules = useCallback(
     (updatedModules: IManagementModule[]) => {
-      localStorage.setItem('@WePlan:modules', JSON.stringify(updatedModules));
+      localStorage.setItem(
+        `@WP-Enterprise:modules`,
+        JSON.stringify(updatedModules),
+      );
 
       setData({
         token: data.token,

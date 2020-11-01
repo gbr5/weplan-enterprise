@@ -109,10 +109,11 @@ export const AnimationContainer = styled.div`
 
   h1 {
     color: var(--primary-color);
-    font-size: 60px;
+    font-size: 40px;
 
     strong {
       color: var(--title-color);
+      font-size: 40px;
     }
   }
 
@@ -129,6 +130,12 @@ export const AnimationContainer = styled.div`
     }
 
     h1 {
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      color: var(--title-color);
+      font-size: 32px;
       margin-bottom: 24px;
     }
   }

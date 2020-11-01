@@ -32,7 +32,7 @@ export const WorkStation = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 668px;
+  height: 800px;
   width: 100%;
   background: var(--letter-color-3);
   padding: 16px 0;
