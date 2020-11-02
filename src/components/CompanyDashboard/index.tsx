@@ -120,7 +120,6 @@ const CompanyDashboard: React.FC = () => {
 
   const [wpModules, setWPModules] = useState<IContractWPModulesDTO[]>();
 
-  // const [companyHiredModules, setCompanyHiredModules] = useState(modules);
   const [marketPlace, setMarketPlace] = useState(false);
   const [masterUsers, setMasterUsers] = useState<IMasterUserDTO[]>([]);
 
@@ -203,6 +202,11 @@ const CompanyDashboard: React.FC = () => {
     // 14 -4
     handleCloseCompanyInfoInput();
   }, [handleCloseCompanyInfoInput]);
+  const handleCloseAllWindowAndVariables = useCallback(() => {
+    closeAllWindow();
+    setAddEmployeeWindow(false);
+    setSelectedEmployee({} as IUserEmployeeDTO);
+  }, [closeAllWindow]);
   const handleContractOrderWindow = useCallback(() => {
     closeAllWindow();
     setContractOrderWindow(true);
@@ -433,7 +437,12 @@ const CompanyDashboard: React.FC = () => {
   useEffect(() => {
     getCompanyEmployees();
   }, [getCompanyEmployees]);
-
+  const updateCompanyEmployees = useCallback(() => {
+    setAddEmployeeWindow(false);
+    setEditEmployeeWindow(false);
+    setSelectedEmployee({} as IUserEmployeeDTO);
+    getCompanyEmployees();
+  }, [getCompanyEmployees]);
   const getCompanyMasterUsers = useCallback(() => {
     try {
       api
@@ -574,15 +583,15 @@ const CompanyDashboard: React.FC = () => {
     <>
       {!!editEmployeeWindow && (
         <EditCompanyEmployeeForm
-          getEmployees={getCompanyEmployees}
-          onHandleCloseWindow={() => setEditEmployeeWindow(false)}
+          getEmployees={updateCompanyEmployees}
+          onHandleCloseWindow={handleCloseAllWindowAndVariables}
           userEmployee={selectedEmployee}
         />
       )}
       {!!addEmployeeWindow && !!wpModules && (
         <AddEmployeeWindow
-          getEmployees={getCompanyEmployees}
-          onHandleCloseWindow={handleEmployeesWindow}
+          getEmployees={updateCompanyEmployees}
+          onHandleCloseWindow={handleCloseAllWindowAndVariables}
         />
       )}
       {!!addMasterUserWindow && (
@@ -590,7 +599,7 @@ const CompanyDashboard: React.FC = () => {
           handleMessageWindow={() => setEmailSentMessageWindow(true)}
           getMasterUsers={getCompanyMasterUsers}
           handleCloseWindow={() => setAddMasterUserWindow(false)}
-          onHandleCloseWindow={handleInitialWindow}
+          onHandleCloseWindow={handleCloseAllWindowAndVariables}
         />
       )}
 
@@ -600,7 +609,7 @@ const CompanyDashboard: React.FC = () => {
           handleCloseWindow={() => setContractOrderWindow(false)}
           handleEmployeeSection={() => setEmployeesSection(true)}
           handleFinancialSection={() => setFinancialSection(false)}
-          onHandleCloseWindow={handleEmployeesWindow}
+          onHandleCloseWindow={handleCloseAllWindowAndVariables}
         />
       )}
       {!!emailSentMessageWindow && (
