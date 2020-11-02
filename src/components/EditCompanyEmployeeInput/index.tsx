@@ -61,21 +61,21 @@ const EditCompanyEmployeeInput: React.FC<IPropsDTO> = ({
       if (inputName === 'position') {
         await api.put(`supplier-employees/${employeeInfo.id}`, {
           position: data,
-          isActive: employeeIsActive,
+          isActive: employeeInfo.isActive,
           email: employeeInfo.email,
         });
       }
       if (inputName === 'email') {
         await api.put(`supplier-employees/${employeeInfo.id}`, {
           position: employeeInfo.position,
-          isActive: employeeIsActive,
+          isActive: employeeInfo.isActive,
           email: data,
         });
       }
       if (inputName === 'isActive') {
         await api.put(`supplier-employees/${employeeInfo.id}`, {
           position: employeeInfo.position,
-          isActive: employeeIsActive,
+          isActive: employeeInfo.isActive,
           email: employeeInfo.email,
         });
       }
@@ -125,14 +125,12 @@ const EditCompanyEmployeeInput: React.FC<IPropsDTO> = ({
     getCompanyEmployees,
     inputName,
     employeeInfo,
-    employeeIsActive,
     data,
   ]);
 
   const handleEmployeeActivation = useCallback(
     async (props: boolean) => {
       try {
-        setEmployeeIsActive(props);
         await api.put(`supplier-employees/${employeeInfo.id}`, {
           position: employeeInfo.position,
           isActive: props,
