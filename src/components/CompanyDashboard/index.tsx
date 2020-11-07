@@ -318,10 +318,7 @@ const CompanyDashboard: React.FC = () => {
                 thisModule.management_module === sortedModule.management_module,
             );
             if (foundModule === undefined) {
-              api.post(`funnels/${company.id}`, {
-                name: 'first',
-                funnel_type: sortedModule.management_module,
-              });
+              throw new Error('Module no found');
             }
             return sortedModule;
           });

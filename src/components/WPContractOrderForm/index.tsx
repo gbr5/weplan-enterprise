@@ -99,8 +99,6 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
           quantity: companyFinancialModuleQuantity,
         });
 
-      console.log(wpProducts);
-
       await api.post('/wp/contract-orders', {
         user_id: company.id,
         products: selectedWPProducts,
@@ -137,7 +135,6 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
     wpProject,
     handleCloseWindow,
     handleEmployeeSection,
-    wpProducts,
     handleFinancialSection,
   ]);
 
