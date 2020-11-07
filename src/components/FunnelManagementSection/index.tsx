@@ -36,7 +36,6 @@ const FunnelManagementSection: React.FC = () => {
       api.get<IFunnelDTO[]>(`funnels/${company.id}`).then(response => {
         // !!!!!!!!!! => ==> Usar este se tiver apenas um funil por tipo
         response.data.map(funnel => {
-          console.log(funnel);
           funnel.funnel_type === 'Comercial' && setComercialFunnel(funnel);
           funnel.funnel_type === 'Operations' && setOperationsFunnel(funnel);
           funnel.funnel_type === 'Projects' && setProjectsFunnel(funnel);
