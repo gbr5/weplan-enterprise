@@ -74,10 +74,6 @@ const SignUp: React.FC = () => {
     setFirstMessageWindow(true);
   }, []);
 
-  const handleMessageWindow = useCallback(() => {
-    setMessageWindow(false);
-  }, []);
-
   const handleSubmitContactInfo = useCallback(
     async (data: IContactInfo) => {
       try {
@@ -102,7 +98,7 @@ const SignUp: React.FC = () => {
           description: 'Bem vindo(a) ao WePlan PRO!',
         });
 
-        history.push('/signin');
+        history.push('/');
         setContactInfo(false);
         setOptions(true);
       } catch (err) {
@@ -372,7 +368,6 @@ const SignUp: React.FC = () => {
             {!options && !!addMasterWindow && (
               <AddFirstMasterUserWindow
                 company_id={userId}
-                handleMessageWindow={handleMessageWindow}
                 handleCloseWindow={handleCloseMasterWindow}
                 onHandleCloseWindow={() => setAddMasterWindow(false)}
               />

@@ -1,6 +1,7 @@
 import React, { MouseEventHandler, useCallback, useState } from 'react';
 import api from '../../services/api';
 import WindowContainer from '../WindowContainer';
+import CompanyFirstMasterForm from '../CompanyFirstMasterForm';
 
 import {
   Container,
@@ -12,7 +13,6 @@ import logo from '../../assets/weplan.svg';
 
 interface IPropsDTO {
   handleCloseWindow: Function;
-  handleMessageWindow: Function;
   onHandleCloseWindow: MouseEventHandler;
   company_id: string;
 }
@@ -27,10 +27,10 @@ const AddFirstMasterUserWindow: React.FC<IPropsDTO> = ({
   handleCloseWindow,
   onHandleCloseWindow,
   company_id,
-  handleMessageWindow,
 }: IPropsDTO) => {
   const [users, setUsers] = useState<IUser[]>([]);
   const [masterUser, setMasterUser] = useState<IUser>({} as IUser);
+  const [addMasterWindow, setAddMasterWindow] = useState(false);
 
   const handleSelectUser = useCallback(
     (props: IUser) => {
@@ -55,75 +55,78 @@ const AddFirstMasterUserWindow: React.FC<IPropsDTO> = ({
   }, []);
 
   const handleAddMasterUser = useCallback(async () => {
-    try {
-      await api.post(`suppliers/master/user/${company_id}/${masterUser.id}`, {
-        email: masterUser.email,
-        password: masterUser.email,
-      });
-
-      handleMessageWindow();
-      handleCloseWindow();
-    } catch (err) {
-      throw new Error(err);
-    }
-  }, [handleCloseWindow, handleMessageWindow, masterUser, company_id]);
+    setAddMasterWindow(true);
+  }, []);
 
   return (
-    <WindowContainer
-      onHandleCloseWindow={onHandleCloseWindow}
-      containerStyle={{
-        top: '0%',
-        left: '0%',
-        height: '100%',
-        width: '100%',
-        zIndex: 30,
-      }}
-    >
-      <Container>
-        <img src={logo} alt="WePlanPRO" />
-        <h1>Adicionar Usuário Master</h1>
-        <div>
-          <InputContainer>
-            <h2>Buscar</h2>
-            <input onChange={e => handleGetUsers(e.target.value)} />
-            {/* <MdSearch size={30} /> */}
-          </InputContainer>
-          <ul>
-            {users.map(thisUser => (
-              <ToggleRow
-                isActive={masterUser.id === thisUser.id}
-                key={thisUser.id}
-              >
-                <h2 style={{ color: 'black' }}>{thisUser.name}</h2>
-                {masterUser.id !== thisUser.id ? (
-                  <button
-                    type="button"
-                    onClick={() => handleSelectUser(thisUser)}
-                  >
-                    Selecionar
-                  </button>
-                ) : (
-                  <span>
+    <>
+      {!!addMasterWindow && (
+        <CompanyFirstMasterForm
+          userMaster={masterUser}
+          getMasters={handleGetUsers}
+          handleCloseWindow={handleCloseWindow}
+          company_id={company_id}
+          onHandleCloseWindow={onHandleCloseWindow}
+        />
+      )}
+      <WindowContainer
+        onHandleCloseWindow={onHandleCloseWindow}
+        containerStyle={{
+          top: '0%',
+          left: '0%',
+          height: '100%',
+          width: '100%',
+          zIndex: 30,
+        }}
+      >
+        <Container>
+          <img src={logo} alt="WePlanPRO" />
+          <h1>Adicionar Usuário Master</h1>
+          <div>
+            <InputContainer>
+              <h2>Buscar</h2>
+              <input onChange={e => handleGetUsers(e.target.value)} />
+              {/* <MdSearch size={30} /> */}
+            </InputContainer>
+            <ul>
+              {users.map(thisUser => (
+                <ToggleRow
+                  isActive={masterUser.id === thisUser.id}
+                  key={thisUser.id}
+                >
+                  <h2 style={{ color: 'black' }}>{thisUser.name}</h2>
+                  {masterUser.id !== thisUser.id ? (
                     <button
                       type="button"
                       onClick={() => handleSelectUser(thisUser)}
                     >
-                      Selecionado
+                      Selecionar
                     </button>
-                  </span>
-                )}
-              </ToggleRow>
-            ))}
-          </ul>
-          <ButtonContainer>
-            <button type="button" onClick={handleAddMasterUser}>
-              Selecionar usuário
-            </button>
-            <a href="https://weplan.party">Ainda não criei o usuário master</a>
-          </ButtonContainer>
-        </div>
-      </Container>
-    </WindowContainer>
+                  ) : (
+                    <span>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectUser(thisUser)}
+                      >
+                        Selecionado
+                      </button>
+                    </span>
+                  )}
+                </ToggleRow>
+              ))}
+            </ul>
+            <ButtonContainer>
+              <button type="button" onClick={handleAddMasterUser}>
+                Selecionar usuário
+              </button>
+              <a href="https://weplan.party">
+                Ainda não criei o usuário master
+              </a>
+            </ButtonContainer>
+          </div>
+        </Container>
+      </WindowContainer>
+    </>
   );
 };
 
