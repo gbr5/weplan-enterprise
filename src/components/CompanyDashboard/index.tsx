@@ -593,7 +593,6 @@ const CompanyDashboard: React.FC = () => {
       )}
       {!!addMasterUserWindow && (
         <AddMasterUserWindow
-          handleMessageWindow={() => setEmailSentMessageWindow(true)}
           getMasterUsers={getCompanyMasterUsers}
           handleCloseWindow={() => setAddMasterUserWindow(false)}
           onHandleCloseWindow={handleCloseAllWindowAndVariables}
