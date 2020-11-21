@@ -3,15 +3,15 @@ export default {
 
   colors: {
     primary: 'rgba(255, 153, 0, 1)',
-    secondary: '#0B3954',
+    secondary: '#DDDBF1',
 
-    background: '#c9c9c9',
-    header: 'rgb(88, 92, 91)',
-    headerHover: 'rgb(158, 155, 141)',
-    card: 'rgb(138, 129, 119)',
+    background: '#011627',
+    header: 'rgb(58, 62, 61)',
+    headerHover: 'rgb(98, 92, 81)',
+    card: '#f9f9f9',
 
     title: 'rgb(255, 200, 55)',
-    text: '#050115',
+    text: '#f9f9f9',
     letter1: '#FFF',
     letter2: 'rgb(149, 152, 158)',
     letter3: 'rgb(179, 182, 178)',
@@ -25,7 +25,7 @@ export default {
     toastErrorColor: '#c53030',
     toastErrorBackgroundColor: '#fddede',
 
-    windowBoxShadow: 'rgba(255, 150, 10, 0.3)',
+    windowBoxShadow: '2px 2px 5px 3px rgba(255, 150, 10, 0.3)',
 
     green: '#47c101',
     red: '#cf4444',
