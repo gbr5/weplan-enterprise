@@ -36,8 +36,8 @@ export const StageFunnel = styled.span<IStageActivePropsDTO>`
 
   align-items: center;
   justify-content: stretch;
-  gap: 32px;
-  padding: 32px 8px;
+  gap: 5px;
+  padding: 8px;
   width: 100%;
   height: 24px;
   border-radius: 4px;
@@ -47,19 +47,27 @@ export const StageFunnel = styled.span<IStageActivePropsDTO>`
   background: var(--background-color);
 
   &:hover {
-    border: 1px solid var(--primary-color);
-    border-left: 2px solid var(--title-color);
-    border-right: 1px solid var(--red-color);
     color: var(--title-color);
 
+    h3 {
+      color: var(--primary-color);
+    }
     svg {
       color: var(--primary-color);
     }
   }
 
-  > strong {
+  > p {
+    color: var(--primary-color);
+    font-size: 12px;
+    line-height: 26px;
+    transition: 0.3s;
+    display: block;
+  }
+
+  > h3 {
     color: var(--letter-color-4);
-    font-size: 20px;
+    font-size: 12px;
     line-height: 26px;
     transition: 0.3s;
     display: block;
@@ -69,6 +77,8 @@ export const StageFunnel = styled.span<IStageActivePropsDTO>`
     margin-left: auto;
     background: transparent;
     border: none;
+    font-size: 10px;
+    line-height: 26px;
 
     &:hover {
       svg {
@@ -89,14 +99,14 @@ export const StageFunnel = styled.span<IStageActivePropsDTO>`
       border-left: 1px solid var(--title-color);
       transition: 0.25s;
 
-      > strong {
+      > h3 {
         color: var(--primary-color);
       }
 
       &:hover {
         opacity: 0.8;
 
-        > strong {
+        > h3 {
           color: var(--title-color);
         }
       }
@@ -118,7 +128,8 @@ export const Funnel = styled.span<IActivePropsDTO>`
   border-radius: 4px;
   color: var(--letter-color-3);
 
-  transition: 0.3s;
+  transition: 0.5s;
+  border: 1px solid transparent;
   animation: ${appearFromTop} 0.5s;
   /*
   border-bottom: 2px solid var(--title-color);
@@ -128,9 +139,8 @@ export const Funnel = styled.span<IActivePropsDTO>`
 
   &:hover {
     border: 1px solid var(--primary-color);
-    border-left: 2px solid var(--title-color);
-    border-right: 1px solid var(--red-color);
     color: var(--title-color);
+    box-shadow: var(--window-box-shadow);
 
     svg {
       color: var(--primary-color);
@@ -144,20 +154,38 @@ export const Funnel = styled.span<IActivePropsDTO>`
     transition: 0.3s;
     display: block;
   }
+  > span {
+    width: 100%;
+    > button {
+      height: 40px;
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid transparent;
+      padding: 5px;
+      color: var(--title-color);
+      border-radius: 5px;
+      width: 100%;
+      border: 1px solid var(--title-color);
+      box-shadow: var(--window-box-shadow);
 
-  > button {
-    margin-left: auto;
-    background: transparent;
-    border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
 
-    &:hover {
       svg {
-        color: var(--title-color);
+        margin-left: auto;
+        color: var(--letter-color-4);
       }
-    }
 
-    svg {
-      color: var(--letter-color-4);
+      &:hover {
+        border: 1px solid var(--title-color);
+        background: var(--primary-color);
+        color: black;
+        svg {
+          color: black;
+        }
+      }
     }
   }
 
@@ -187,8 +215,9 @@ export const StageSection = styled.span`
   display: flex;
   align-items: center;
   justify-content: stretch;
-  gap: 8px;
-  padding: 8px;
+  gap: 5px;
+  padding: 5px;
   width: 100%;
   background: var(--card-color);
+  font-size: 16px;
 `;

@@ -216,11 +216,11 @@ const CompanyDashboard: React.FC = () => {
     closeAllWindow();
     setCompanyInfoSection(true);
   }, [closeAllWindow]);
-  const handleEmployeesWindow = useCallback(() => {
+  const handleEmployeesSection = useCallback(() => {
     closeAllWindow();
     setEmployeesSection(true);
   }, [closeAllWindow]);
-  const handleFunnelsWindow = useCallback(() => {
+  const handleFunnelsSection = useCallback(() => {
     closeAllWindow();
     setFunnelsSection(true);
   }, [closeAllWindow]);
@@ -364,25 +364,12 @@ const CompanyDashboard: React.FC = () => {
             });
             return sortModules;
           });
-          sortModules.map(sortedModule => {
-            const foundModule = modules.find(
-              thisModule =>
-                thisModule.management_module === sortedModule.management_module,
-            );
-            if (foundModule === undefined) {
-              api.post(`funnels/${company.id}`, {
-                name: 'first',
-                funnel_type: sortedModule.management_module,
-              });
-            }
-            return sortedModule;
-          });
           // setCompanyWPContracts(response.data);
         });
     } catch (err) {
       throw new Error(err);
     }
-  }, [company, modules]);
+  }, [company]);
   useEffect(() => {
     getCompanyFunnels();
   }, [getCompanyFunnels]);
@@ -685,10 +672,10 @@ const CompanyDashboard: React.FC = () => {
           <button type="button" onClick={handleInitialWindow}>
             Informações da empresa
           </button>
-          <button type="button" onClick={handleFunnelsWindow}>
+          <button type="button" onClick={handleFunnelsSection}>
             Funil
           </button>
-          <button type="button" onClick={handleEmployeesWindow}>
+          <button type="button" onClick={handleEmployeesSection}>
             Colaboradores
           </button>
           <button type="button" onClick={handleFinanceWindow}>

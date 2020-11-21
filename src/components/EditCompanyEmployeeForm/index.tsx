@@ -78,13 +78,17 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
   getEmployees,
   userEmployee,
 }: IPropsDTO) => {
-  const { company } = useAuth();
+  const { company, modules } = useAuth();
 
   const [userConfirmation, setUserConfirmation] = useState(
     {} as IUserConfirmation,
   );
   const [userModules, setUserModules] = useState<IUserModules[]>([]);
   const [selectedModule, setSelectedModule] = useState({} as IUserModules);
+  const [companyComercialAccess, setCompanyComercialAccess] = useState(false);
+  const [companyOperationsAccess, setCompanyOperationsAccess] = useState(false);
+  const [companyProjectsAccess, setCompanyProjectsAccess] = useState(false);
+  const [companyFinancialAccess, setCompanyFinancialAccess] = useState(false);
   const [editModulesWindow, setEditModulesWindow] = useState(false);
   const [positionInput, setPositionInput] = useState(false);
   const [isActiveInput, setIsActiveInput] = useState(false);
@@ -94,8 +98,8 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
   const [messageInput, setMessageInput] = useState(false);
   const [crmAccessLevel, setCRMAccessLevel] = useState('-');
   const [crmAccess, setCRMAccess] = useState(false);
-  const [operationsAccessLevel, setOperationsAccessLevel] = useState('-');
   const [operationsAccess, setOperationsAccess] = useState(false);
+  const [operationsAccessLevel, setOperationsAccessLevel] = useState('-');
   const [projectsAccessLevel, setProjectsAccessLevel] = useState('-');
   const [projectsAccess, setProjectsAccess] = useState(false);
   const [financialAccessLevel, setFinancialAccessLevel] = useState('-');
@@ -186,6 +190,24 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
   }, [userConfirmation, userEmployee]);
 
   useEffect(() => {
+    const ciaComercialAccess = modules.find(
+      xModule => xModule.management_module === 'Comercial',
+    );
+    setCompanyComercialAccess(!!ciaComercialAccess);
+    const ciaOperationsAccess = modules.find(
+      xModule => xModule.management_module === 'Operations',
+    );
+    setCompanyOperationsAccess(!!ciaOperationsAccess);
+    const ciaProjectsAccess = modules.find(
+      xModule => xModule.management_module === 'Projects',
+    );
+    setCompanyProjectsAccess(!!ciaProjectsAccess);
+    const ciaFinancialAccess = modules.find(
+      xModule => xModule.management_module === 'Financial',
+    );
+    setCompanyFinancialAccess(!!ciaFinancialAccess);
+  }, [modules]);
+  useEffect(() => {
     userModules.map(thisModule => {
       thisModule.management_module === 'Comercial' && setCRMAccess(true);
       thisModule.management_module === 'Comercial' &&
@@ -255,7 +277,7 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
         }}
       >
         <Container>
-          <h2>Adicionar Colaborador</h2>
+          <h2>Editar Perfil do Colaborador</h2>
           <div>
             <FirstRow>
               <img src={avatarPlaceholder} alt="WePlanPRO Company Employee" />
@@ -377,140 +399,156 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
               <span>
                 <ModulesContainer>
                   <span>
-                    <ModuleContainer>
-                      <h3>Comercial</h3>
-                      {crmAccess ? (
-                        userModules.map(thisModule => {
-                          if (thisModule.management_module === 'Comercial') {
-                            return (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleEditModulesWindow(thisModule)
-                                }
-                              >
-                                {crmAccessLevel}
-                              </button>
+                    {!!companyComercialAccess && (
+                      <ModuleContainer>
+                        <h3>Comercial</h3>
+                        {crmAccess ? (
+                          userModules.map(thisModule => {
+                            const companyModule = modules.find(
+                              xModule =>
+                                xModule.management_module ===
+                                thisModule.management_module,
                             );
-                          }
-                          return '';
-                        })
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleEditModulesWindow({
-                              id: '',
-                              management_module: 'Comercial',
-                              access_level: 0,
-                            })
-                          }
-                        >
-                          {operationsAccessLevel}
-                        </button>
-                      )}
-                    </ModuleContainer>
-                    <ModuleContainer>
-                      <h3>Operações</h3>
-                      {operationsAccess ? (
-                        userModules.map(thisModule => {
-                          if (thisModule.management_module === 'Operations') {
-                            return (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleEditModulesWindow(thisModule)
-                                }
-                              >
-                                {operationsAccessLevel}
-                              </button>
-                            );
-                          }
-                          return '';
-                        })
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleEditModulesWindow({
-                              id: '',
-                              management_module: 'Operations',
-                              access_level: 0,
-                            })
-                          }
-                        >
-                          {operationsAccessLevel}
-                        </button>
-                      )}
-                    </ModuleContainer>
+                            if (
+                              thisModule.management_module === 'Comercial' &&
+                              companyModule
+                            ) {
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEditModulesWindow(thisModule)
+                                  }
+                                >
+                                  {crmAccessLevel}
+                                </button>
+                              );
+                            }
+                            return '';
+                          })
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEditModulesWindow({
+                                id: '',
+                                management_module: 'Comercial',
+                                access_level: 0,
+                              })
+                            }
+                          >
+                            {crmAccessLevel}
+                          </button>
+                        )}
+                      </ModuleContainer>
+                    )}
+                    {!!companyOperationsAccess && (
+                      <ModuleContainer>
+                        <h3>Operações</h3>
+                        {operationsAccess ? (
+                          userModules.map(thisModule => {
+                            if (thisModule.management_module === 'Operations') {
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEditModulesWindow(thisModule)
+                                  }
+                                >
+                                  {operationsAccessLevel}
+                                </button>
+                              );
+                            }
+                            return '';
+                          })
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEditModulesWindow({
+                                id: '',
+                                management_module: 'Operations',
+                                access_level: 0,
+                              })
+                            }
+                          >
+                            {operationsAccessLevel}
+                          </button>
+                        )}
+                      </ModuleContainer>
+                    )}
                   </span>
                   <span>
-                    <ModuleContainer>
-                      <h3>Projetos</h3>
-                      {projectsAccess ? (
-                        userModules.map(thisModule => {
-                          if (thisModule.management_module === 'Projects') {
-                            return (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleEditModulesWindow(thisModule)
-                                }
-                              >
-                                {projectsAccessLevel}
-                              </button>
-                            );
-                          }
-                          return '';
-                        })
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleEditModulesWindow({
-                              id: '',
-                              management_module: 'Projects',
-                              access_level: 0,
-                            })
-                          }
-                        >
-                          {projectsAccessLevel}
-                        </button>
-                      )}
-                    </ModuleContainer>
-                    <ModuleContainer>
-                      <h3>Financeiro</h3>
-                      {financialAccess ? (
-                        userModules.map(thisModule => {
-                          if (thisModule.management_module === 'Financial') {
-                            return (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleEditModulesWindow(thisModule)
-                                }
-                              >
-                                {financialAccessLevel}
-                              </button>
-                            );
-                          }
-                          return '';
-                        })
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleEditModulesWindow({
-                              id: '',
-                              management_module: 'Financial',
-                              access_level: 0,
-                            })
-                          }
-                        >
-                          {financialAccessLevel}
-                        </button>
-                      )}
-                    </ModuleContainer>
+                    {!!companyProjectsAccess && (
+                      <ModuleContainer>
+                        <h3>Projetos</h3>
+                        {projectsAccess ? (
+                          userModules.map(thisModule => {
+                            if (thisModule.management_module === 'Projects') {
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEditModulesWindow(thisModule)
+                                  }
+                                >
+                                  {projectsAccessLevel}
+                                </button>
+                              );
+                            }
+                            return '';
+                          })
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEditModulesWindow({
+                                id: '',
+                                management_module: 'Projects',
+                                access_level: 0,
+                              })
+                            }
+                          >
+                            {projectsAccessLevel}
+                          </button>
+                        )}
+                      </ModuleContainer>
+                    )}
+                    {!!companyFinancialAccess && (
+                      <ModuleContainer>
+                        <h3>Financeiro</h3>
+                        {financialAccess ? (
+                          userModules.map(thisModule => {
+                            if (thisModule.management_module === 'Financial') {
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEditModulesWindow(thisModule)
+                                  }
+                                >
+                                  {financialAccessLevel}
+                                </button>
+                              );
+                            }
+                            return '';
+                          })
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEditModulesWindow({
+                                id: '',
+                                management_module: 'Financial',
+                                access_level: 0,
+                              })
+                            }
+                          >
+                            {financialAccessLevel}
+                          </button>
+                        )}
+                      </ModuleContainer>
+                    )}
                   </span>
                 </ModulesContainer>
                 <div>
