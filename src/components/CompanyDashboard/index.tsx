@@ -1,6 +1,12 @@
 import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { MdPersonAdd } from 'react-icons/md';
-import { FiUpload, FiChevronsRight, FiEdit3, FiEye } from 'react-icons/fi';
+import {
+  FiUpload,
+  FiChevronsRight,
+  FiEdit3,
+  FiEye,
+  FiImage,
+} from 'react-icons/fi';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
 
@@ -20,19 +26,22 @@ import {
   EmployeeSection,
   ConfirmedEmployeeSection,
   UnConfirmedEmployeeSection,
+  FinacialSection,
+  Payments,
 } from './styles';
 import AddEmployeeWindow from '../AddEmployeeWindow';
-// import WPContractOrderForm from '../WPContractOrderForm';
 import logo from '../../assets/elefante.png';
-import WindowContainer from '../WindowContainer';
 import IUserDTO from '../../dtos/IUserDTO';
 import EditCompanyInfoInput from '../EditCompanyInfoInput';
 import AddMasterUserWindow from '../AddMasterUserWindow';
 import { useToast } from '../../hooks/toast';
 import SupplierPageHeader from '../SupplierPageHeader';
 import EditCompanyEmployeeForm from '../EditCompanyEmployeeForm';
-import WPContractOrderForm from '../WPContractOrderForm';
 import FunnelManagementSection from '../FunnelManagementSection';
+import WePlanProductsSection from '../WePlanProductsSection';
+import NotACustomerYet from '../Messages/NotACustomerYet';
+import MasterUserCreatedSuccessfuly from '../Messages/MasterUserCreatedSuccessfuly';
+import AddEmployeeMessageWindow from '../Messages/AddEmployeeMessageWindow';
 
 interface IUserEmployeeDTO {
   id: string;
@@ -99,15 +108,10 @@ const CompanyDashboard: React.FC = () => {
   } = useAuth();
 
   const { addToast } = useToast();
-  // 1
   const [companyNameInput, setCompanyNameInput] = useState(false);
-  // 2
   const [companyIDInput, setCompanyIDInput] = useState(false);
-  // 3
   const [companyUserNameInput, setCompanyUserNameInput] = useState(false);
-  // 4
   const [companyEmailInput, setCompanyEmailInput] = useState(false);
-  // 5
   const [companyPhoneInput, setCompanyPhoneInput] = useState(false);
   const [companyInformation, setCompanyInformation] = useState(
     {} as ICompanyInformationDTO,
@@ -130,39 +134,33 @@ const CompanyDashboard: React.FC = () => {
   const [notActiveEmployees, setNotActiveEmployees] = useState<IEmployeeDTO[]>(
     [],
   );
-  // 1
-  const [companyInfoSection, setCompanyInfoSection] = useState(false);
-  // 2
+
+  // Sections
+  const [contracts, setContracts] = useState<string[]>([]);
+  const [companyInfoSection, setCompanyInfoSection] = useState(true);
   const [employeesSection, setEmployeesSection] = useState(false);
-  const [funnelsSection, setFunnelsSection] = useState(true);
-  // 3
+  const [funnelsSection, setFunnelsSection] = useState(false);
+  const [wePlanProductsSection, setWePlanProductsSection] = useState(false);
   const [financialSection, setFinancialSection] = useState(false);
-  // 4
   const [advancedOptionsSection, setAdvancedOptionsSection] = useState(false);
-  // 5
   const [helpSection, setHelpSection] = useState(false);
-  // 6
   const [documentationSection, setDocumentationSection] = useState(false);
-  // 7
   const [
     chooseWPproductMessageWindow,
     setChooseWPproductMessageWindow,
   ] = useState(false);
-  // 8
   const [addEmployeeMessageWindow, setAddEmployeeMessageWindow] = useState(
     false,
   );
-  // 9
   const [emailSentMessageWindow, setEmailSentMessageWindow] = useState(false);
-  // 10
-  const [contractOrderWindow, setContractOrderWindow] = useState(false);
-  // 11
   const [addEmployeeWindow, setAddEmployeeWindow] = useState(false);
-  // 12
   const [editEmployeeWindow, setEditEmployeeWindow] = useState(false);
-  // 13
   const [addMasterUserWindow, setAddMasterUserWindow] = useState(false);
-  // 14
+  const [wpContractOrders, setWPContractOrders] = useState<IWPContractOrder[]>(
+    [],
+  );
+  const [dontReRender, setDontReRender] = useState(0);
+
   const handleCloseCompanyInfoInput = useCallback(() => {
     setCompanyNameInput(false);
     setCompanyIDInput(false);
@@ -172,46 +170,28 @@ const CompanyDashboard: React.FC = () => {
   }, []);
 
   const closeAllWindow = useCallback(() => {
-    // 1 -1
     setCompanyInfoSection(false);
-    // 2 -1
     setEmployeesSection(false);
     setFunnelsSection(false);
-    // 3 -1
     setFinancialSection(false);
-    // 4 -1
     setAdvancedOptionsSection(false);
-    // 5 -1
     setHelpSection(false);
-    // 6 -1
     setDocumentationSection(false);
-    // 7 -2
     setEmailSentMessageWindow(false);
-    // 8 -2
     setChooseWPproductMessageWindow(false);
-    // 9 -2
     setAddEmployeeMessageWindow(false);
-    // 10 -3
     setEditEmployeeWindow(false);
-    // 11 -3
-    setContractOrderWindow(false);
-    // 12 -3
     setAddEmployeeWindow(false);
-    // 13 -3
     setAddMasterUserWindow(false);
-    // 14 -4
     handleCloseCompanyInfoInput();
+    setWePlanProductsSection(false);
   }, [handleCloseCompanyInfoInput]);
   const handleCloseAllWindowAndVariables = useCallback(() => {
     closeAllWindow();
-    setAddEmployeeWindow(false);
     setSelectedEmployee({} as IUserEmployeeDTO);
+    setCompanyInfoSection(true);
   }, [closeAllWindow]);
-  const handleContractOrderWindow = useCallback(() => {
-    closeAllWindow();
-    setContractOrderWindow(true);
-    setFinancialSection(true);
-  }, [closeAllWindow]);
+
   const handleInitialWindow = useCallback(() => {
     closeAllWindow();
     setCompanyInfoSection(true);
@@ -223,6 +203,10 @@ const CompanyDashboard: React.FC = () => {
   const handleFunnelsSection = useCallback(() => {
     closeAllWindow();
     setFunnelsSection(true);
+  }, [closeAllWindow]);
+  const handleWePlanProductsSection = useCallback(() => {
+    closeAllWindow();
+    setWePlanProductsSection(true);
   }, [closeAllWindow]);
   const handleFinanceWindow = useCallback(() => {
     closeAllWindow();
@@ -278,21 +262,30 @@ const CompanyDashboard: React.FC = () => {
     });
     setEditEmployeeWindow(true);
   }, []);
+
   const getCompanyWPContractOrders = useCallback(() => {
     try {
+      setDontReRender(1);
       api
         .get<IWPContractOrder[]>(`/wp/contract-orders/${company.id}`)
         .then(response => {
-          if (response.data.length <= 0) {
+          const wpContracts = response.data.filter(
+            wpContract => wpContract.products.length > 0,
+          );
+
+          if (wpContracts.length <= 0) {
             setChooseWPproductMessageWindow(true);
+            handleWePlanProductsSection();
           }
+          setWPContractOrders(wpContracts);
+
           const sortModules: IContractWPModulesDTO[] = [];
           response.data.map(hModule => {
             hModule.products.map(mProduct => {
               const pName = mProduct.weplanProduct.name;
               if (
                 pName === 'Comercial' ||
-                pName === 'Operations' ||
+                pName === 'Production' ||
                 pName === 'Financial' ||
                 pName === 'Projects'
               ) {
@@ -305,30 +298,30 @@ const CompanyDashboard: React.FC = () => {
                     management_module: mProduct.weplanProduct.name,
                   });
                 }
-              } else {
-                setMarketPlace(true);
               }
               return mProduct;
             });
             return sortModules;
           });
           sortModules.map(sortedModule => {
-            const foundModule = modules.find(
+            modules.find(
               thisModule =>
                 thisModule.management_module === sortedModule.management_module,
             );
-            if (foundModule === undefined) {
-              throw new Error('Module no found');
-            }
             return sortedModule;
           });
           updateModules(sortModules);
-          // setCompanyWPContracts(response.data);
         });
     } catch (err) {
       throw new Error(err);
     }
-  }, [company, modules, updateModules]);
+  }, [company, modules, updateModules, handleWePlanProductsSection]);
+
+  useEffect(() => {
+    if (dontReRender <= 0) {
+      getCompanyWPContractOrders();
+    }
+  }, [getCompanyWPContractOrders, dontReRender]);
 
   const getCompanyFunnels = useCallback(() => {
     try {
@@ -344,7 +337,7 @@ const CompanyDashboard: React.FC = () => {
               const pName = mProduct.weplanProduct.name;
               if (
                 pName === 'Comercial' ||
-                pName === 'Operations' ||
+                pName === 'Production' ||
                 pName === 'Financial' ||
                 pName === 'Projects'
               ) {
@@ -357,14 +350,11 @@ const CompanyDashboard: React.FC = () => {
                     management_module: mProduct.weplanProduct.name,
                   });
                 }
-              } else {
-                setMarketPlace(true);
               }
               return mProduct;
             });
             return sortModules;
           });
-          // setCompanyWPContracts(response.data);
         });
     } catch (err) {
       throw new Error(err);
@@ -562,115 +552,73 @@ const CompanyDashboard: React.FC = () => {
       phone: companyPhone,
     });
   }, [company, companyPhone, companyInfo]);
+  useEffect(() => {
+    const pRODUCTS: IOrderProduct[] = [];
+    const cONTRACTS: string[] = [];
+    wpContractOrders.map(contract => {
+      const { products } = contract;
+
+      products.map(crm => {
+        pRODUCTS.push(crm);
+        crm.weplanProduct.name === 'Marketplace' && setMarketPlace(true);
+
+        return crm;
+      });
+      return contract;
+    });
+    setContracts(cONTRACTS);
+  }, [wpContractOrders]);
 
   return (
     <>
-      {!!editEmployeeWindow && (
-        <EditCompanyEmployeeForm
-          getEmployees={updateCompanyEmployees}
-          onHandleCloseWindow={handleCloseAllWindowAndVariables}
-          userEmployee={selectedEmployee}
-        />
-      )}
-      {!!addEmployeeWindow && !!wpModules && (
-        <AddEmployeeWindow
-          getEmployees={updateCompanyEmployees}
-          onHandleCloseWindow={handleCloseAllWindowAndVariables}
-        />
-      )}
-      {!!addMasterUserWindow && (
-        <AddMasterUserWindow
-          getMasterUsers={getCompanyMasterUsers}
-          handleCloseWindow={() => setAddMasterUserWindow(false)}
-          onHandleCloseWindow={handleCloseAllWindowAndVariables}
-        />
-      )}
-
-      {!!contractOrderWindow && (
-        <WPContractOrderForm
-          getCompanyWPContracts={getCompanyWPContractOrders}
-          handleCloseWindow={() => setContractOrderWindow(false)}
-          handleEmployeeSection={() => setEmployeesSection(true)}
-          handleFinancialSection={() => setFinancialSection(false)}
-          onHandleCloseWindow={handleCloseAllWindowAndVariables}
-        />
-      )}
-      {!!emailSentMessageWindow && (
-        <WindowContainer
-          onHandleCloseWindow={() => setEmailSentMessageWindow(false)}
-          containerStyle={{
-            zIndex: 150,
-            top: '30%',
-            left: '25%',
-          }}
-        >
-          <h2>Sucesso</h2>
-          <p>
-            Foi enviado um e-mail para que o usuário confirme a sua solicitação.
-          </p>
-          <h4>
-            Qualquer dúvida, pode enviar uma mensagem no meu whatsapp - 31 99932
-            4093
-          </h4>
-          <div>
-            <button type="button" onClick={handleContractOrderWindow}>
-              Quero ser um vencedor!
-            </button>
-          </div>
-        </WindowContainer>
-      )}
-      {!!chooseWPproductMessageWindow && (
-        <WindowContainer
-          onHandleCloseWindow={() => setChooseWPproductMessageWindow(false)}
-          containerStyle={{
-            zIndex: 15,
-            top: '30%',
-            left: '25%',
-          }}
-        >
-          <h2>Olá {company.name}, tudo bem?</h2>
-          <p>Vi que você ainda não possui nenhum produto contratado.</p>
-          <p>Qual a sua necessidade no momento?</p>
-          <p>Posso pedir para um de nossos consultores te ligar?</p>
-          <h4>
-            Se precisar de mim, pode enviar uma mensagem no meu whatsapp - 31
-            99932 4093
-          </h4>
-          <div>
-            <button type="button" onClick={handleContractOrderWindow}>
-              Quero ser um vencedor!
-            </button>
-          </div>
-        </WindowContainer>
-      )}
-      {!!addEmployeeMessageWindow && (
-        <WindowContainer
-          onHandleCloseWindow={() => setAddEmployeeMessageWindow(false)}
-          containerStyle={{
-            top: '30%',
-            left: '25%',
-          }}
-        >
-          <p>
-            Vi também que você ainda não possui nenhum colaborador cadastrado.
-          </p>
-          <p>No menu lateral você gerenciar os seus colaboradores.</p>
-          <h4>
-            Se precisar de mim, pode enviar uma mensagem no meu whatsapp - 31
-            99932 4093
-          </h4>
-          <div>
-            <button type="button" onClick={() => setAddEmployeeWindow(true)}>
-              Adicionar colaborador!
-            </button>
-          </div>
-        </WindowContainer>
-      )}
+      <>
+        {!!editEmployeeWindow && (
+          <EditCompanyEmployeeForm
+            getEmployees={updateCompanyEmployees}
+            onHandleCloseWindow={handleCloseAllWindowAndVariables}
+            userEmployee={selectedEmployee}
+          />
+        )}
+        {!!addEmployeeWindow && !!wpModules && (
+          <AddEmployeeWindow
+            getEmployees={updateCompanyEmployees}
+            onHandleCloseWindow={handleCloseAllWindowAndVariables}
+          />
+        )}
+        {!!addMasterUserWindow && (
+          <AddMasterUserWindow
+            getMasterUsers={getCompanyMasterUsers}
+            handleCloseWindow={() => setAddMasterUserWindow(false)}
+            onHandleCloseWindow={handleCloseAllWindowAndVariables}
+          />
+        )}
+        {!!emailSentMessageWindow && (
+          <MasterUserCreatedSuccessfuly
+            onHandleCloseWindow={() => setEmailSentMessageWindow(false)}
+            handleWePlanProductsSection={handleWePlanProductsSection}
+          />
+        )}
+        {!!chooseWPproductMessageWindow && (
+          <NotACustomerYet
+            onHandleCloseWindow={() => setChooseWPproductMessageWindow(false)}
+            handleWePlanProductsSection={handleWePlanProductsSection}
+          />
+        )}
+        {!!addEmployeeMessageWindow && (
+          <AddEmployeeMessageWindow
+            onHandleCloseWindow={() => setAddEmployeeMessageWindow(false)}
+            handleEmployeeSection={handleEmployeesSection}
+          />
+        )}
+      </>
       <Container>
         <SupplierPageHeader />
         <SideMenu>
           <button type="button" onClick={handleInitialWindow}>
             Informações da empresa
+          </button>
+          <button type="button" onClick={handleWePlanProductsSection}>
+            Produtos Weplan
           </button>
           <button type="button" onClick={handleFunnelsSection}>
             Funil
@@ -914,6 +862,7 @@ const CompanyDashboard: React.FC = () => {
                 <ConfirmedEmployeeSection>
                   <h2>{dashboardTitle}</h2>
                   <span>
+                    Product
                     <button
                       type="button"
                       onClick={() => setAddEmployeeWindow(true)}
@@ -999,13 +948,43 @@ const CompanyDashboard: React.FC = () => {
               </EmployeeSection>
             )}
             {!!funnelsSection && <FunnelManagementSection />}
+            {!!wePlanProductsSection && (
+              <WePlanProductsSection
+                handleWpProductsSection={handleWePlanProductsSection}
+              />
+            )}
             {!!financialSection && (
-              <Section>
+              <FinacialSection>
                 <h1>Financeiro</h1>
-                <button type="button" onClick={handleContractOrderWindow}>
-                  Contratar Módulo de Gestão
-                </button>
-              </Section>
+                <Payments>
+                  <h1>Contratos</h1>
+                  <div>
+                    <h3>ID</h3>
+                  </div>
+                  {contracts.map(contract => (
+                    <div key={contract}>
+                      <p>{contract}</p>
+                    </div>
+                  ))}
+                </Payments>
+                <Payments>
+                  <h1>Pagamentos efetuados</h1>
+                  <div>
+                    <h3>Vencimento</h3>
+                    <h3>Valor</h3>
+                    <h3>Pagamento</h3>
+                    <h3>Comprovante</h3>
+                  </div>
+                  <div>
+                    <p>15/09/2020</p>
+                    <p>R$ 400,00</p>
+                    <p>10/09/2020</p>
+                    <p>
+                      <FiImage />
+                    </p>
+                  </div>
+                </Payments>
+              </FinacialSection>
             )}
             {!!advancedOptionsSection && (
               <Section>

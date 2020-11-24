@@ -25,11 +25,11 @@ const FunnelManagementSection: React.FC = () => {
   const { addToast } = useToast();
 
   const [companyComercialAccess, setCompanyComercialAccess] = useState(false);
-  const [companyOperationsAccess, setCompanyOperationsAccess] = useState(false);
+  const [companyProductionAccess, setCompanyProductionAccess] = useState(false);
   const [companyProjectsAccess, setCompanyProjectsAccess] = useState(false);
   const [companyFinancialAccess, setCompanyFinancialAccess] = useState(false);
   const [comercialStagesSection, setComercialStagesSection] = useState(false);
-  const [operationsStagesSection, setOperationsStagesSection] = useState(false);
+  const [productionStagesSection, setProductionStagesSection] = useState(false);
   const [projectsStagesSection, setProjectsStagesSection] = useState(false);
   const [funnelCardInfoFieldWindow, setFunnelCardInfoFieldWindow] = useState(
     false,
@@ -42,8 +42,8 @@ const FunnelManagementSection: React.FC = () => {
   const [comercialFunnelStages, setComercialFunnelStages] = useState<
     IFunnelStageDTO[]
   >([]);
-  const [operationsFunnel, setOperationsFunnel] = useState({} as IFunnelDTO);
-  const [operationsFunnelStages, setOperationsFunnelStages] = useState<
+  const [productionFunnel, setProductionFunnel] = useState({} as IFunnelDTO);
+  const [productionFunnelStages, setProductionFunnelStages] = useState<
     IFunnelStageDTO[]
   >([]);
   const [projectsFunnel, setProjectsFunnel] = useState({} as IFunnelDTO);
@@ -76,9 +76,9 @@ const FunnelManagementSection: React.FC = () => {
           funnel.funnel_type === 'Comercial' && setComercialFunnel(funnel);
           funnel.funnel_type === 'Comercial' &&
             setComercialFunnelStages(funnel.stages.sort(compareStageOrder));
-          funnel.funnel_type === 'Operations' && setOperationsFunnel(funnel);
-          funnel.funnel_type === 'Operations' &&
-            setOperationsFunnelStages(funnel.stages.sort(compareStageOrder));
+          funnel.funnel_type === 'Production' && setProductionFunnel(funnel);
+          funnel.funnel_type === 'Production' &&
+            setProductionFunnelStages(funnel.stages.sort(compareStageOrder));
           funnel.funnel_type === 'Projects' && setProjectsFunnel(funnel);
           funnel.funnel_type === 'Projects' &&
             setProjectsFunnelStages(funnel.stages.sort(compareStageOrder));
@@ -91,8 +91,8 @@ const FunnelManagementSection: React.FC = () => {
         // setComercialFunnel(
         //   response.data.filter(funnel => funnel.funnel_type === 'Comercial'),
         // );
-        // setOperationsFunnel(
-        //   response.data.filter(funnel => funnel.funnel_type === 'Operations'),
+        // setProductionFunnel(
+        //   response.data.filter(funnel => funnel.funnel_type === 'Production'),
         // );
         // setProjectsFunnel(
         //   response.data.filter(funnel => funnel.funnel_type === 'Projects'),
@@ -123,6 +123,52 @@ const FunnelManagementSection: React.FC = () => {
     setFunnelCardInfoFieldWindow(false);
   }, []);
 
+  const createComercialFunnelCardDefaultInfoField = useCallback(async () => {
+    try {
+      if (comercialFunnel) {
+        await api.post(`/comercial/funnel`, {
+          company_id: company.id,
+          funnel_id: comercialFunnel.id,
+        });
+      }
+    } catch (err) {
+      throw new Error(err);
+    }
+  }, [comercialFunnel, company]);
+
+  const createProductionFunnelCardDefaultInfoField = useCallback(async () => {
+    await api.post(`/production/funnel`, {
+      company_id: company.id,
+      funnel_id: productionFunnel.id,
+    });
+  }, [productionFunnel, company]);
+
+  const createProjectsFunnelCardDefaultInfoField = useCallback(async () => {
+    try {
+      if (projectsFunnel) {
+        await api.post(`/projects/funnel`, {
+          company_id: company.id,
+          funnel_id: projectsFunnel.id,
+        });
+      }
+    } catch (err) {
+      throw new Error(err);
+    }
+  }, [projectsFunnel, company]);
+
+  const createFinancialFunnelCardDefaultInfoField = useCallback(async () => {
+    try {
+      if (financialFunnel) {
+        await api.post(`/financial/funnel`, {
+          company_id: company.id,
+          funnel_id: financialFunnel.id,
+        });
+      }
+    } catch (err) {
+      throw new Error(err);
+    }
+  }, [financialFunnel, company]);
+
   useEffect(() => {
     getFunnels();
   }, [getFunnels]);
@@ -132,10 +178,10 @@ const FunnelManagementSection: React.FC = () => {
       xModule => xModule.management_module === 'Comercial',
     );
     setCompanyComercialAccess(!!ciaComercialAccess);
-    const ciaOperationsAccess = modules.find(
-      xModule => xModule.management_module === 'Operations',
+    const ciaProductionAccess = modules.find(
+      xModule => xModule.management_module === 'Production',
     );
-    setCompanyOperationsAccess(!!ciaOperationsAccess);
+    setCompanyProductionAccess(!!ciaProductionAccess);
     const ciaProjectsAccess = modules.find(
       xModule => xModule.management_module === 'Projects',
     );
@@ -145,6 +191,27 @@ const FunnelManagementSection: React.FC = () => {
     );
     setCompanyFinancialAccess(!!ciaFinancialAccess);
   }, [modules]);
+
+  useEffect(() => {
+    if (comercialFunnel.company_funnel_card_info_fields) {
+      createComercialFunnelCardDefaultInfoField();
+    }
+  }, [comercialFunnel, createComercialFunnelCardDefaultInfoField]);
+  useEffect(() => {
+    if (productionFunnel.company_funnel_card_info_fields) {
+      createProductionFunnelCardDefaultInfoField();
+    }
+  }, [productionFunnel, createProductionFunnelCardDefaultInfoField]);
+  useEffect(() => {
+    if (projectsFunnel.company_funnel_card_info_fields) {
+      createProjectsFunnelCardDefaultInfoField();
+    }
+  }, [projectsFunnel, createProjectsFunnelCardDefaultInfoField]);
+  useEffect(() => {
+    if (financialFunnel.company_funnel_card_info_fields) {
+      createFinancialFunnelCardDefaultInfoField();
+    }
+  }, [financialFunnel, createFinancialFunnelCardDefaultInfoField]);
 
   return (
     <>
@@ -204,14 +271,14 @@ const FunnelManagementSection: React.FC = () => {
               ))}
           </StageSection>
         )}
-        {companyOperationsAccess && (
+        {companyProductionAccess && (
           <Funnel isActive={false}>
-            <h3>{operationsFunnel.name}</h3>
+            <h3>{productionFunnel.name}</h3>
             <span>
               <button
                 type="button"
                 onClick={() =>
-                  handleFunnelCardInfoFieldWindow(operationsFunnel)
+                  handleFunnelCardInfoFieldWindow(productionFunnel)
                 }
               >
                 Informações
@@ -221,7 +288,7 @@ const FunnelManagementSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  handleFunnelCardInfoFieldWindow(operationsFunnel)
+                  handleFunnelCardInfoFieldWindow(productionFunnel)
                 }
               >
                 Tarefas
@@ -231,11 +298,11 @@ const FunnelManagementSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() =>
-                  setOperationsStagesSection(!operationsStagesSection)
+                  setProductionStagesSection(!productionStagesSection)
                 }
               >
                 Etapas
-                {operationsStagesSection ? (
+                {productionStagesSection ? (
                   <FiChevronUp size={24} />
                 ) : (
                   <FiChevronDown size={24} />
@@ -244,10 +311,10 @@ const FunnelManagementSection: React.FC = () => {
             </span>
           </Funnel>
         )}
-        {operationsStagesSection && (
+        {productionStagesSection && (
           <StageSection>
-            {operationsFunnelStages.length > 0 &&
-              operationsFunnelStages.map(stage => (
+            {productionFunnelStages.length > 0 &&
+              productionFunnelStages.map(stage => (
                 <StageFunnel isActive={false}>
                   <h3>{stage.name}</h3>
                 </StageFunnel>

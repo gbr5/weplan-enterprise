@@ -10,8 +10,8 @@ interface IPropsDTO {
   comercialAccess: boolean;
   handleCRMDashboard: MouseEventHandler;
   // 3°
-  operationsAccess: boolean;
-  handleOperationsDashboard?: MouseEventHandler;
+  productionAccess: boolean;
+  handleProductionDashboard?: MouseEventHandler;
   // 4°
   projectsAccess: boolean;
   handleProjectsDashboard?: MouseEventHandler;
@@ -25,8 +25,8 @@ const UserEmployeeModuleMenu: React.FC<IPropsDTO> = ({
   handleMainDashboard,
   comercialAccess,
   handleCRMDashboard,
-  operationsAccess,
-  handleOperationsDashboard,
+  productionAccess,
+  handleProductionDashboard,
   projectsAccess,
   handleProjectsDashboard,
   financialAccess,
@@ -46,10 +46,10 @@ const UserEmployeeModuleMenu: React.FC<IPropsDTO> = ({
           </ModuleTitle>
         </button>
       )}
-      {operationsAccess && (
-        <button type="button" onClick={handleOperationsDashboard}>
-          <ModuleTitle isActive={title === 'Operações'}>
-            <strong>Operações</strong>
+      {productionAccess && (
+        <button type="button" onClick={handleProductionDashboard}>
+          <ModuleTitle isActive={title === 'Produção'}>
+            <strong>Produção</strong>
           </ModuleTitle>
         </button>
       )}
