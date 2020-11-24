@@ -46,7 +46,7 @@ const SupplierPageHeader: React.FC = () => {
 
           <button type="button" onClick={handleNavigateToDashboard}>
             <img src={logo} alt="WePlan" />
-            <h1>PRO</h1>
+            <h1>Enterprise</h1>
           </button>
 
           <h2>{company.name}</h2>

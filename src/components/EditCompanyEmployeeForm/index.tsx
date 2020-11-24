@@ -86,7 +86,7 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
   const [userModules, setUserModules] = useState<IUserModules[]>([]);
   const [selectedModule, setSelectedModule] = useState({} as IUserModules);
   const [companyComercialAccess, setCompanyComercialAccess] = useState(false);
-  const [companyOperationsAccess, setCompanyOperationsAccess] = useState(false);
+  const [companyProductionAccess, setCompanyProductionAccess] = useState(false);
   const [companyProjectsAccess, setCompanyProjectsAccess] = useState(false);
   const [companyFinancialAccess, setCompanyFinancialAccess] = useState(false);
   const [editModulesWindow, setEditModulesWindow] = useState(false);
@@ -98,8 +98,8 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
   const [messageInput, setMessageInput] = useState(false);
   const [crmAccessLevel, setCRMAccessLevel] = useState('-');
   const [crmAccess, setCRMAccess] = useState(false);
-  const [operationsAccess, setOperationsAccess] = useState(false);
-  const [operationsAccessLevel, setOperationsAccessLevel] = useState('-');
+  const [productionAccess, setProductionAccess] = useState(false);
+  const [productionAccessLevel, setProductionAccessLevel] = useState('-');
   const [projectsAccessLevel, setProjectsAccessLevel] = useState('-');
   const [projectsAccess, setProjectsAccess] = useState(false);
   const [financialAccessLevel, setFinancialAccessLevel] = useState('-');
@@ -194,10 +194,10 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
       xModule => xModule.management_module === 'Comercial',
     );
     setCompanyComercialAccess(!!ciaComercialAccess);
-    const ciaOperationsAccess = modules.find(
-      xModule => xModule.management_module === 'Operations',
+    const ciaProductionAccess = modules.find(
+      xModule => xModule.management_module === 'Production',
     );
-    setCompanyOperationsAccess(!!ciaOperationsAccess);
+    setCompanyProductionAccess(!!ciaProductionAccess);
     const ciaProjectsAccess = modules.find(
       xModule => xModule.management_module === 'Projects',
     );
@@ -219,17 +219,17 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
       thisModule.management_module === 'Comercial' &&
         thisModule.access_level === 3 &&
         setCRMAccessLevel('Individual');
-      thisModule.management_module === 'Operations' &&
-        setOperationsAccess(true);
-      thisModule.management_module === 'Operations' &&
+      thisModule.management_module === 'Production' &&
+        setProductionAccess(true);
+      thisModule.management_module === 'Production' &&
         thisModule.access_level === 1 &&
-        setOperationsAccessLevel('Global');
-      thisModule.management_module === 'Operations' &&
+        setProductionAccessLevel('Global');
+      thisModule.management_module === 'Production' &&
         thisModule.access_level === 2 &&
-        setOperationsAccessLevel('Equipe');
-      thisModule.management_module === 'Operations' &&
+        setProductionAccessLevel('Equipe');
+      thisModule.management_module === 'Production' &&
         thisModule.access_level === 3 &&
-        setOperationsAccessLevel('Individual');
+        setProductionAccessLevel('Individual');
       thisModule.management_module === 'Projects' && setProjectsAccess(true);
       thisModule.management_module === 'Projects' &&
         thisModule.access_level === 1 &&
@@ -442,12 +442,12 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
                         )}
                       </ModuleContainer>
                     )}
-                    {!!companyOperationsAccess && (
+                    {!!companyProductionAccess && (
                       <ModuleContainer>
-                        <h3>Operações</h3>
-                        {operationsAccess ? (
+                        <h3>Produção</h3>
+                        {productionAccess ? (
                           userModules.map(thisModule => {
-                            if (thisModule.management_module === 'Operations') {
+                            if (thisModule.management_module === 'Production') {
                               return (
                                 <button
                                   type="button"
@@ -455,7 +455,7 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
                                     handleEditModulesWindow(thisModule)
                                   }
                                 >
-                                  {operationsAccessLevel}
+                                  {productionAccessLevel}
                                 </button>
                               );
                             }
@@ -467,12 +467,12 @@ const EditCompanyEmployeeForm: React.FC<IPropsDTO> = ({
                             onClick={() =>
                               handleEditModulesWindow({
                                 id: '',
-                                management_module: 'Operations',
+                                management_module: 'Production',
                                 access_level: 0,
                               })
                             }
                           >
-                            {operationsAccessLevel}
+                            {productionAccessLevel}
                           </button>
                         )}
                       </ModuleContainer>

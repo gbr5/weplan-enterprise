@@ -39,8 +39,39 @@ export const WorkStation = styled.div`
 
   div {
     width: 100%;
-    height: 100%;
     margin: 8px 0 0;
+  }
+`;
+
+export const Payments = styled.div`
+  width: 100%;
+
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  align-items: center;
+  justify-content: stretch;
+
+  &:nth-child(3) {
+    border-top: 1px solid var(--primary-color);
+  }
+
+  div {
+    width: 100%;
+
+    display: flex;
+    h3 {
+      width: 100%;
+      text-align: center;
+    }
+    p {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  div + div {
+    border-top: 1px solid var(--background-color);
+    padding: 5px;
   }
 `;
 
@@ -79,6 +110,24 @@ export const Section = styled.div`
   }
 `;
 
+export const FinacialSection = styled.div`
+  width: 100%;
+  color: var(--letter-color-5);
+  padding: 40px;
+`;
+
+export const HiringButton = styled.button`
+  width: 100%;
+  height: 40px;
+  font-weight: 500;
+  color: var(--background-color);
+  background: none;
+  border: none;
+
+  h1 {
+    margin-bottom: auto;
+  }
+`;
 export const EmployeeSection = styled.div`
   display: grid;
   grid-template-rows: 5fr 3fr;

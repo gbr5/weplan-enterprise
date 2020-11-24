@@ -22,14 +22,6 @@ export const HeaderContent = styled.div`
     height: 56px;
   }
 
-  > h1 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 24px;
-    font-size: 24px;
-  }
-
   > h2 {
     margin-left: auto;
     font-size: 20px;
@@ -55,7 +47,6 @@ export const HeaderContent = styled.div`
       background: transparent;
       border: none;
       color: var(--letter-color-1);
-
       > svg {
         transition: 0.3s;
       }
@@ -64,9 +55,9 @@ export const HeaderContent = styled.div`
 
   > button {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: center;
-    gap: 16px;
+    gap: 8px;
     background: transparent;
     border: none;
     margin-left: 8px;
@@ -76,8 +67,7 @@ export const HeaderContent = styled.div`
     }
 
     > h1 {
-      font-size: 22px;
-      margin-right: 20px;
+      font-size: 20px;
       color: var(--title-color);
     }
   }

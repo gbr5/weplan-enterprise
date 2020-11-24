@@ -12,6 +12,7 @@ import ComercialImage from '../../assets/comercial_module_small.svg';
 import ProductionImage from '../../assets/production_module_small.svg';
 import ProjectsImage from '../../assets/projects_module_small.svg';
 import FinancialImage from '../../assets/financial_module_small.svg';
+// import HRImage from '../../assets/hr_module_small.svg';
 
 import api from '../../services/api';
 
@@ -41,7 +42,7 @@ interface IPropsDTO {
   getCompanyWPContractOrders: Function;
 }
 
-const WPContractOrderForm: React.FC<IPropsDTO> = ({
+const WPAllModulesContractOrderForm: React.FC<IPropsDTO> = ({
   onHandleCloseWindow,
   handleCloseWindow,
   handleWpProductsSection,
@@ -51,10 +52,10 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
   const { company } = useAuth();
 
   const [wpProducts, setWPProducts] = useState<IWPProductDTO[]>([]);
-  const [companyCRMModuleQuantity, setCRMQuantity] = useState(0);
-  const [companyProductionModuleQuantity, setProductionQuantity] = useState(0);
-  const [companyProjectModuleQuantity, setProjectQuantity] = useState(0);
-  const [companyFinancialModuleQuantity, setFinancialQuantity] = useState(0);
+  const [
+    companyManagementModulesQuantity,
+    setCompanyManagementModulesQuantity,
+  ] = useState(0);
 
   const getWPProducts = useCallback(() => {
     try {
@@ -74,6 +75,7 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
   const wpProduction = wpProducts.find(wpM => wpM.name === 'Production');
   const wpProject = wpProducts.find(wpM => wpM.name === 'Projects');
   const wpFinancial = wpProducts.find(wpM => wpM.name === 'Financial');
+  // const wpHR = wpProducts.find(wpM => wpM.name === 'HR');
 
   const inputHeight = { height: '40px', width: '80px' };
 
@@ -81,26 +83,25 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
     try {
       const selectedWPProducts: ISelectedWPManagementModulesDTO[] = [];
 
-      companyCRMModuleQuantity > 0 &&
-        selectedWPProducts.push({
-          weplan_product_id: wpCRM ? wpCRM.id : '',
-          quantity: companyCRMModuleQuantity,
-        });
-      companyProductionModuleQuantity > 0 &&
-        selectedWPProducts.push({
-          weplan_product_id: wpProduction ? wpProduction.id : '',
-          quantity: companyProductionModuleQuantity,
-        });
-      companyProjectModuleQuantity > 0 &&
-        selectedWPProducts.push({
-          weplan_product_id: wpProject ? wpProject.id : '',
-          quantity: companyProjectModuleQuantity,
-        });
-      companyFinancialModuleQuantity > 0 &&
-        selectedWPProducts.push({
-          weplan_product_id: wpFinancial ? wpFinancial.id : '',
-          quantity: companyFinancialModuleQuantity,
-        });
+      companyManagementModulesQuantity > 0 &&
+        selectedWPProducts.push(
+          {
+            weplan_product_id: wpCRM ? wpCRM.id : '',
+            quantity: companyManagementModulesQuantity,
+          },
+          {
+            weplan_product_id: wpProduction ? wpProduction.id : '',
+            quantity: companyManagementModulesQuantity,
+          },
+          {
+            weplan_product_id: wpProject ? wpProject.id : '',
+            quantity: companyManagementModulesQuantity,
+          },
+          {
+            weplan_product_id: wpFinancial ? wpFinancial.id : '',
+            quantity: companyManagementModulesQuantity,
+          },
+        );
 
       await api.post('/wp/contract-orders', {
         user_id: company.id,
@@ -109,8 +110,8 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
 
       addToast({
         type: 'success',
-        title: 'Compra efetuada com sucesso!',
-        description: 'Você já pode utilizar os produtos contratados.',
+        title: 'Membro da festa adicionado com sucesso',
+        description: 'Ele já pode visualizar as informações do evento.',
       });
       getCompanyWPContractOrders();
       handleWpProductsSection();
@@ -118,18 +119,15 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
     } catch (err) {
       addToast({
         type: 'error',
-        title: 'Algum erro ocorreu!',
-        description: 'Compra não efetuada, tente novamente.',
+        title: 'Erro ao adicionar membro da festa',
+        description: 'Erro ao adicionar membro da festa, tente novamente.',
       });
       throw new Error(err);
     }
   }, [
     addToast,
     getCompanyWPContractOrders,
-    companyCRMModuleQuantity,
-    companyProductionModuleQuantity,
-    companyProjectModuleQuantity,
-    companyFinancialModuleQuantity,
+    companyManagementModulesQuantity,
     company,
     wpCRM,
     wpFinancial,
@@ -153,43 +151,23 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
       <form>
         <Container>
           <h2>Contratar Módulo de Gestão</h2>
-          <p>Selecione o número de acessos para cada módulo</p>
+          <p>Selecione o número de acessos WePlanChampion</p>
           <p>1 acesso por pessoa</p>
           <WPModule>
             <div>
-              <img src={ComercialImage} alt="We Plan | Comercial" />
+              <div>
+                <img src={ComercialImage} alt="We Plan | Comercial" />
+                <img src={ProductionImage} alt="We Plan | Production" />
+                <img src={ProjectsImage} alt="We Plan | Projects" />
+                <img src={FinancialImage} alt="We Plan | Financial" />
+              </div>
               <input
                 type="number"
                 style={inputHeight}
-                name="quantity"
-                onChange={e => setCRMQuantity(Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <img src={ProductionImage} alt="We Plan | Production" />
-              <input
-                type="number"
-                style={inputHeight}
-                name="quantity"
-                onChange={e => setProductionQuantity(Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <img src={ProjectsImage} alt="We Plan | Projects" />
-              <input
-                type="number"
-                style={inputHeight}
-                name="quantity"
-                onChange={e => setProjectQuantity(Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <img src={FinancialImage} alt="We Plan | Financial" />
-              <input
-                type="number"
-                style={inputHeight}
-                name="quantity"
-                onChange={e => setFinancialQuantity(Number(e.target.value))}
+                name="crm_quantity"
+                onChange={e =>
+                  setCompanyManagementModulesQuantity(Number(e.target.value))
+                }
               />
             </div>
           </WPModule>
@@ -202,4 +180,4 @@ const WPContractOrderForm: React.FC<IPropsDTO> = ({
   );
 };
 
-export default WPContractOrderForm;
+export default WPAllModulesContractOrderForm;
