@@ -136,9 +136,9 @@ const CompanyDashboard: React.FC = () => {
   // Sections
   const [contracts, setContracts] = useState<string[]>([]);
 
-  const [companyInfoSection, setCompanyInfoSection] = useState(false);
+  const [companyInfoSection, setCompanyInfoSection] = useState(true);
   const [employeesSection, setEmployeesSection] = useState(false);
-  const [funnelsSection, setFunnelsSection] = useState(true);
+  const [funnelsSection, setFunnelsSection] = useState(false);
   const [wePlanProductsSection, setWePlanProductsSection] = useState(false);
   const [financialSection, setFinancialSection] = useState(false);
   const [advancedOptionsSection, setAdvancedOptionsSection] = useState(false);
