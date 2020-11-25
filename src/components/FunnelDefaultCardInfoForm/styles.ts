@@ -34,53 +34,18 @@ export const ModulesContainer = styled.div`
   }
 `;
 
-export const FirstRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 4fr;
+export const RowContainer = styled.div`
+  display: flex;
+  flex-direction: column;
   width: 100%;
   align-items: center;
   gap: 40px;
 
-  img {
-    height: 120px;
-    border-radius: 50%;
-  }
-
-  div {
+  span {
     display: flex;
-    flex-direction: column;
-    align-items: left;
-    justify-content: center;
-    gap: 16px;
-
-    span {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      align-items: left;
-      justify-content: center;
-      gap: 32px;
-
-      strong {
-        width: 100%;
-        font-size: 20px;
-        color: var(--primary-color);
-      }
-      p {
-        width: 100%;
-        font-size: 16px;
-        color: var(--letter-color-4);
-      }
-      span {
-        width: 100%;
-        margin-right: 16px;
-        p {
-          width: 100%;
-          font-size: 16px;
-          color: var(--letter-color-4);
-        }
-      }
-    }
+    width: 100%;
+    align-items: center;
+    gap: 40px;
   }
 `;
 
@@ -88,6 +53,7 @@ export const ButtonContainer = styled.div`
   display: flex;
   flex-direction: row;
   gap: 32px;
+  width: 100%;
 
   button {
     width: 100%;
@@ -104,9 +70,8 @@ export const AddButton = styled.button`
   background: var(--primary-color);
 `;
 
-export const SecondRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr;
+export const Row = styled.div`
+  display: flex;
   width: 100%;
   align-items: center;
   gap: 40px;
@@ -117,6 +82,7 @@ export const SecondRow = styled.div`
     align-items: left;
     justify-content: center;
     gap: 16px;
+    width: 100%;
 
     h3 {
       width: 100%;

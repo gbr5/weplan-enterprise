@@ -13,6 +13,7 @@ import api from '../../services/api';
 
 import {
   Container,
+  FieldHeader,
   BooleanButton,
   SecondRow,
   AddButton,
@@ -20,6 +21,7 @@ import {
 } from './styles';
 
 import IFunnelDTO from '../../dtos/IFunnelDTO';
+import FunnelDefaultCardInfoForm from '../FunnelDefaultCardInfoForm';
 
 interface IFunnelCardInfoField {
   id: string;
@@ -46,6 +48,8 @@ const FunnelDefaultCardInfoWindow: React.FC<IPropsDTO> = ({
   funnel,
 }: IPropsDTO) => {
   const { addToast } = useToast();
+
+  const [addDefaultInfoFieldForm, setAddDefaultInfoFieldForm] = useState(false);
 
   const [funnelCardInfoFields, setFunnelCardInfoFields] = useState<
     IFunnelCardInfoField[]
@@ -96,48 +100,75 @@ const FunnelDefaultCardInfoWindow: React.FC<IPropsDTO> = ({
     setSelectedFunnelCardInfoField(props);
   }, []);
 
+  const handleAddDefaultInfoFieldForm = useCallback(() => {
+    setAddDefaultInfoFieldForm(true);
+  }, []);
+  const handleCloseDefaultInfoFieldForm = useCallback(() => {
+    setAddDefaultInfoFieldForm(false);
+  }, []);
+
   useEffect(() => {
     getFunnelInfoFields();
   }, [getFunnelInfoFields]);
 
   return (
-    <WindowContainer
-      onHandleCloseWindow={onHandleCloseWindow}
-      containerStyle={{
-        zIndex: 2000,
-        top: '5%',
-        left: '15%',
-        height: '90%',
-        width: '70%',
-      }}
-    >
-      <Container>
-        <h2>Informações Default do Módulo {funnel.name}</h2>
-        <div>
-          <SecondRow>
-            {funnelCardInfoFields.map(field => (
-              <span key={field.id}>
-                <BooleanButton
-                  isActive={field.id === selectedFunnelCardInfoField.id}
-                  onClick={() => handleSelectInfoField(field)}
-                >
-                  <h2>{field.name}</h2>
-                  <p>{field.field_type}</p>
-                  <p>{field.isRequired}</p>
-                </BooleanButton>
-                <DeleteButton
-                  type="button"
-                  onClick={() => handleDeleteInfoField(field)}
-                >
-                  <MdDelete size={32} />
-                </DeleteButton>
-              </span>
-            ))}
-          </SecondRow>
-        </div>
-        <AddButton type="submit">Adicionar Campo</AddButton>
-      </Container>
-    </WindowContainer>
+    <>
+      {!!addDefaultInfoFieldForm && (
+        <FunnelDefaultCardInfoForm
+          funnel={funnel}
+          getFunnels={getFunnels}
+          handleCloseWindow={handleCloseDefaultInfoFieldForm}
+          onHandleCloseWindow={() => setAddDefaultInfoFieldForm(false)}
+        />
+      )}
+      <WindowContainer
+        onHandleCloseWindow={onHandleCloseWindow}
+        containerStyle={{
+          zIndex: 30,
+          top: '5%',
+          left: '15%',
+          height: '90%',
+          width: '70%',
+        }}
+      >
+        <Container>
+          <h2>Informações Default do Módulo {funnel.name}</h2>
+          <div>
+            <FieldHeader>
+              <strong>Nome do campo</strong>
+              <strong>Tipo do campo</strong>
+            </FieldHeader>
+            <SecondRow>
+              {funnelCardInfoFields.map(field => (
+                <span key={field.id}>
+                  <BooleanButton
+                    isActive={field.id === selectedFunnelCardInfoField.id}
+                    onClick={() => handleSelectInfoField(field)}
+                  >
+                    <strong>{field.name}</strong>
+                    <p>
+                      {field.field_type === 'string' && 'Texto'}
+                      {field.field_type === 'number' && 'Número'}
+                      {field.field_type === 'Date' && 'Data'}
+                    </p>
+                    <p>{field.isRequired ? 'Obrigatório' : ''}</p>
+                  </BooleanButton>
+                  <DeleteButton
+                    type="button"
+                    onClick={() => handleDeleteInfoField(field)}
+                  >
+                    <MdDelete size={32} />
+                  </DeleteButton>
+                </span>
+              ))}
+            </SecondRow>
+          </div>
+          <AddButton type="submit" onClick={handleAddDefaultInfoFieldForm}>
+            Adicionar Campo
+          </AddButton>
+        </Container>
+      </WindowContainer>
+    </>
   );
 };
 
