@@ -22,7 +22,7 @@ const Funnel: React.FC<IProps> = ({ funnel, getFunnels, isActive }: IProps) => {
   const [funnelStages, setFunnelStages] = useState<IFunnelStageDTO[]>([]);
 
   const [funnelCardInfoFieldWindow, setFunnelCardInfoFieldWindow] = useState(
-    true,
+    false,
   );
 
   const handleFunnelCardInfoFieldWindow = useCallback(() => {
