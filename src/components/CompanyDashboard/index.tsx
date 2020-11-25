@@ -121,10 +121,8 @@ const CompanyDashboard: React.FC = () => {
     'Informações da Empresa',
   );
   const [companyPhone, setCompanyPhone] = useState(0);
-
-  const [wpModules, setWPModules] = useState<IContractWPModulesDTO[]>();
-
   const [marketPlace, setMarketPlace] = useState(false);
+  const [wpModules, setWPModules] = useState<IContractWPModulesDTO[]>();
   const [masterUsers, setMasterUsers] = useState<IMasterUserDTO[]>([]);
 
   const [employees, setEmployees] = useState<IEmployeeDTO[]>([]);
@@ -137,14 +135,16 @@ const CompanyDashboard: React.FC = () => {
 
   // Sections
   const [contracts, setContracts] = useState<string[]>([]);
-  const [companyInfoSection, setCompanyInfoSection] = useState(true);
+
+  const [companyInfoSection, setCompanyInfoSection] = useState(false);
   const [employeesSection, setEmployeesSection] = useState(false);
-  const [funnelsSection, setFunnelsSection] = useState(false);
+  const [funnelsSection, setFunnelsSection] = useState(true);
   const [wePlanProductsSection, setWePlanProductsSection] = useState(false);
   const [financialSection, setFinancialSection] = useState(false);
   const [advancedOptionsSection, setAdvancedOptionsSection] = useState(false);
   const [helpSection, setHelpSection] = useState(false);
   const [documentationSection, setDocumentationSection] = useState(false);
+
   const [
     chooseWPproductMessageWindow,
     setChooseWPproductMessageWindow,

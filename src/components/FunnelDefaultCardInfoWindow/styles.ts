@@ -1,99 +1,36 @@
 import styled, { css } from 'styled-components';
 
 export const Container = styled.div`
-  display: flex;
   width: 100%;
   height: 100%;
-  gap: 32px;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
 
-  h2 {
-    height: 42px;
-    font-size: 32px;
-  }
-`;
-
-export const ModulesContainer = styled.div`
-  display: flex;
-  width: 100%;
-  height: 100%;
-  gap: 32px;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  padding: 0;
-  h2 {
-    height: 42px;
-    font-size: 32px;
-  }
-  span {
-  }
-`;
-
-export const FirstRow = styled.div`
   display: grid;
-  grid-template-columns: 1fr 4fr;
-  width: 100%;
+  grid-template-rows: 1fr 5fr 1fr;
   align-items: center;
-  gap: 40px;
+  justify-content: center;
 
-  img {
-    height: 120px;
-    border-radius: 50%;
-  }
+  gap: 32px;
+  margin: 0;
+  padding: 0;
 
-  div {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    justify-content: center;
-    gap: 16px;
-
-    span {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      align-items: left;
-      justify-content: center;
-      gap: 32px;
-
-      strong {
-        width: 100%;
-        font-size: 20px;
-        color: var(--primary-color);
-      }
-      p {
-        width: 100%;
-        font-size: 16px;
-        color: var(--letter-color-4);
-      }
-      span {
-        width: 100%;
-        margin-right: 16px;
-        p {
-          width: 100%;
-          font-size: 16px;
-          color: var(--letter-color-4);
-        }
-      }
-    }
+  h2 {
+    height: 42px;
+    font-size: 32px;
   }
 `;
 
-export const ButtonContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 32px;
+export const FieldHeader = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+  justify-content: center;
 
-  button {
-    width: 100%;
-    height: 40px;
-    border: none;
-    border-radius: 4px;
+  padding: 10px;
+  gap: 16px;
+
+  strong {
+    font-size: 24px;
+    font-size: 24px;
   }
 `;
 export const AddButton = styled.button`
@@ -118,17 +55,24 @@ export const DeleteButton = styled.button`
 export const SecondRow = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   justify-content: stretch;
   width: 100%;
+  height: 100%;
   align-items: center;
-  gap: 40px;
+  gap: 5px;
+  overflow-y: scroll;
+  background: var(--card-color);
+
+  border-radius: 5px;
+  padding: 5px;
 
   span {
+    width: 100%;
     display: flex;
     align-items: stretch;
     justify-content: left;
     gap: 16px;
+    padding: 5px;
   }
 `;
 
@@ -137,20 +81,26 @@ interface IButtomProps {
 }
 
 export const BooleanButton = styled.button<IButtomProps>`
-  display: flex;
-  align-items: left;
-  justify-content: stretch;
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr;
+  align-items: center;
+  justify-content: center;
   gap: 16px;
+  padding: 5px;
 
   width: 100%;
   height: 40px;
   border: none;
   border-radius: 4px;
-  background-color: rgba(150, 100, 50, 0.5);
+  background: var(--background-color);
   font-size: 16px;
-  color: var(--letter-color-5);
+  color: var(--letter-color-4);
   opacity: 0.8;
   transition: 0.25s;
+
+  strong {
+    text-align: left;
+  }
 
   &:hover {
     color: var(--letter-color-5);

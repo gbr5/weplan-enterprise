@@ -10,15 +10,22 @@ import WindowContainer from '../WindowContainer';
 
 import api from '../../services/api';
 
-import { Container, BooleanButton, SecondRow, AddButton } from './styles';
+import {
+  Container,
+  RowContainer,
+  BooleanButton,
+  Row,
+  AddButton,
+} from './styles';
 import { useAuth } from '../../hooks/auth';
+import IFunnelDTO from '../../dtos/IFunnelDTO';
 
 interface IDefaultFunnelInfoFieldForm {
   name: string;
 }
 
 interface IPropsDTO {
-  funnel_id: string;
+  funnel: IFunnelDTO;
   onHandleCloseWindow: MouseEventHandler;
   handleCloseWindow: Function;
   getFunnels: Function;
@@ -28,7 +35,7 @@ const FunnelDefaultCardInfoForm: React.FC<IPropsDTO> = ({
   onHandleCloseWindow,
   handleCloseWindow,
   getFunnels,
-  funnel_id,
+  funnel,
 }: IPropsDTO) => {
   const { addToast } = useToast();
   const { company } = useAuth();
@@ -59,8 +66,8 @@ const FunnelDefaultCardInfoForm: React.FC<IPropsDTO> = ({
           abortEarly: false,
         });
 
-        await api.post(`funnels/company-funnel-info-field/${company.id}`, {
-          funnel_id,
+        await api.post(`funnels/company-funnel-card-info-field/${company.id}`, {
+          funnel_id: funnel.id,
           name: data.name,
           field_type: fieldDataType,
           isRequired: fieldIsRequired,
@@ -90,7 +97,7 @@ const FunnelDefaultCardInfoForm: React.FC<IPropsDTO> = ({
     [
       addToast,
       getFunnels,
-      funnel_id,
+      funnel,
       company,
       handleCloseWindow,
       fieldIsRequired,
@@ -102,7 +109,7 @@ const FunnelDefaultCardInfoForm: React.FC<IPropsDTO> = ({
     <WindowContainer
       onHandleCloseWindow={onHandleCloseWindow}
       containerStyle={{
-        zIndex: 2000,
+        zIndex: 35,
         top: '5%',
         left: '15%',
         height: '90%',
@@ -111,10 +118,10 @@ const FunnelDefaultCardInfoForm: React.FC<IPropsDTO> = ({
     >
       <Form ref={formRef} onSubmit={handleSubmit}>
         <Container>
-          <h2>Adicionar Master</h2>
-          <div>
-            <SecondRow>
-              <span>
+          <h2>Adicionar Campo Default do Funil {funnel.name}</h2>
+          <RowContainer>
+            <span>
+              <Row>
                 <div>
                   <p>Qual o tipo de dado do campo</p>
                   <span>
@@ -141,6 +148,8 @@ const FunnelDefaultCardInfoForm: React.FC<IPropsDTO> = ({
                     </BooleanButton>
                   </span>
                 </div>
+              </Row>
+              <Row>
                 <div>
                   <p>Campo obrigatório?</p>
                   <span>
@@ -160,17 +169,15 @@ const FunnelDefaultCardInfoForm: React.FC<IPropsDTO> = ({
                     </BooleanButton>
                   </span>
                 </div>
-                <div>
-                  <p>Nome do Campo</p>
-                  <Input
-                    placeholder="Nome do campo"
-                    name="name"
-                    containerStyle={inputHeight}
-                  />
-                </div>
-              </span>
-            </SecondRow>
-          </div>
+              </Row>
+            </span>
+            <Row>
+              <div>
+                <p>Nome do Campo</p>
+                <Input name="name" containerStyle={inputHeight} />
+              </div>
+            </Row>
+          </RowContainer>
           <AddButton type="submit">Adicionar Campo</AddButton>
         </Container>
       </Form>
